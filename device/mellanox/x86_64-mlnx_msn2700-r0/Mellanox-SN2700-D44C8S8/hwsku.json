@@ -12,9 +12,6 @@
         "Ethernet3": {
             "default_brkout_mode": "1x10G"
         }, 
-        "Ethernet4": {
-            "default_brkout_mode": "1x100G[50G,40G,25G,10G]"
-        }, 
         "Ethernet8": {
             "default_brkout_mode": "1x10G"
         }, 
@@ -26,9 +23,6 @@
         }, 
         "Ethernet11": {
             "default_brkout_mode": "1x10G"
-        }, 
-        "Ethernet12": {
-            "default_brkout_mode": "1x100G[50G,40G,25G,10G]"
         }, 
         "Ethernet16": {
             "default_brkout_mode": "2x50G[40G,25G,10G]"
