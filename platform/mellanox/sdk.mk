@@ -72,16 +72,16 @@ ifeq ($(SDK_FROM_SRC),y)
 $(eval $(call add_derived_package,$(SX_COMPLIB),$(SX_COMPLIB_DBGSYM)))
 endif
 
-#SX_EXAMPLES = sx-examples_1.mlnx.$(MLNX_SDK_DEB_VERSION)_amd64.deb
-#$(SX_EXAMPLES)_SRC_PATH = $(PLATFORM_PATH)/sdk-src/sx-examples
-#$(SX_EXAMPLES)_DEPENDS += $(APPLIBS_DEV) $(SXD_LIBS_DEV)
-#$(SX_EXAMPLES)_RDEPENDS += $(APPLIBS) $(SXD_LIBS)
-#SX_EXAMPLES_DEV = sx-examples-dev_1.mlnx.$(MLNX_SDK_DEB_VERSION)_amd64.deb
-#$(eval $(call add_derived_package,$(SX_EXAMPLES),$(SX_EXAMPLES_DEV)))
-#SX_EXAMPLES_DBGSYM = sx-examples-dbgsym_1.mlnx.$(MLNX_SDK_DEB_VERSION)_amd64.deb
-#ifeq ($(SDK_FROM_SRC),y)
-#$(eval $(call add_derived_package,$(SX_EXAMPLES),$(SX_EXAMPLES_DBGSYM)))
-#endif
+SX_EXAMPLES = sx-examples_1.mlnx.$(MLNX_SDK_DEB_VERSION)_amd64.deb
+$(SX_EXAMPLES)_SRC_PATH = $(PLATFORM_PATH)/sdk-src/sx-examples
+$(SX_EXAMPLES)_DEPENDS += $(APPLIBS_DEV) $(SXD_LIBS_DEV)
+$(SX_EXAMPLES)_RDEPENDS += $(APPLIBS) $(SXD_LIBS)
+SX_EXAMPLES_DEV = sx-examples-dev_1.mlnx.$(MLNX_SDK_DEB_VERSION)_amd64.deb
+$(eval $(call add_derived_package,$(SX_EXAMPLES),$(SX_EXAMPLES_DEV)))
+SX_EXAMPLES_DBGSYM = sx-examples-dbgsym_1.mlnx.$(MLNX_SDK_DEB_VERSION)_amd64.deb
+ifeq ($(SDK_FROM_SRC),y)
+$(eval $(call add_derived_package,$(SX_EXAMPLES),$(SX_EXAMPLES_DBGSYM)))
+endif
 
 SX_GEN_UTILS = sx-gen-utils_1.mlnx.$(MLNX_SDK_DEB_VERSION)_amd64.deb
 $(SX_GEN_UTILS)_SRC_PATH += $(PLATFORM_PATH)/sdk-src/sx-gen-utils
