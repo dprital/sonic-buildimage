@@ -140,13 +140,13 @@ check_warm_boot
 
 if [[ x"${WARM_BOOT}" != x"true" ]]; then
     debug "warmboot is not enabled ..."
-    if [[ x"${FAST_BOOT}" != x"true" ]]; then
+    if [[ x"${FAST_REBOOT}" != x"true" ]]; then
 	    debug "fastboot is not enabled ..."
 	    exit 0
     fi
 fi
 
-if [[ (x"${WARM_BOOT}" == x"true") && (x"${FAST_BOOT}" != x"true") ]]; then
+if [[ (x"${WARM_BOOT}" == x"true") && (x"${FAST_REBOOT}" != x"true") ]]; then
     restore_counters_folder
 fi
 
@@ -165,7 +165,7 @@ for i in `seq 60`; do
     sleep 5
 done
 
-if [[ (x"${WARM_BOOT}" == x"true") && (x"${FAST_BOOT}" != x"true") ]]; then
+if [[ (x"${WARM_BOOT}" == x"true") && (x"${FAST_REBOOT}" != x"true") ]]; then
    stop_control_plane_assistant
 fi
 
