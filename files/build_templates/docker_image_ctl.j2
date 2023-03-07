@@ -250,8 +250,7 @@ function postStartAction()
             fi
 
             if [[ "$BOOT_TYPE" == "fast" ]]; then
-                # set the key to expire in 3 minutes
-                $SONIC_DB_CLI STATE_DB SET "FAST_REBOOT|system" "1" "EX" "180"
+                $SONIC_DB_CLI STATE_DB HSET "FAST_RESTART_ENABLE_TABLE|system" "enable" "true"
             fi
 
             $SONIC_DB_CLI CONFIG_DB SET "CONFIG_DB_INITIALIZED" "1"
