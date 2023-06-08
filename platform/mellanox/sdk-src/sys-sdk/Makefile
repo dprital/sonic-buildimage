@@ -1,24 +1,29 @@
 .ONESHELL:
 SHELL = /bin/bash
 
-MAIN_TARGET = python-sdk-api_1.mlnx.$(MLNX_SDK_DEB_VERSION)_$(CONFIGURED_ARCH).deb
-DERIVED_TARGETS = python-sdk-api-dbgsym_1.mlnx.$(MLNX_SDK_DEB_VERSION)_$(CONFIGURED_ARCH).deb
-PACKAGE_NAME = python_sdk_api
+MAIN_TARGET = sys-sdk_1.mlnx.$(MLNX_SDK_DEB_VERSION)_$(CONFIGURED_ARCH).deb
+DERIVED_TARGETS = 
+PACKAGE_NAME = sys_sdk
 
 $(addprefix $(DEST)/, $(MAIN_TARGET)): $(DEST)/% :
+
 	# get sources
-	rm -rf $(PACKAGE_NAME)-$(MLNX_SDK_VERSION)-$(MLNX_SDK_ISSU_VERSION)
+
+	rm -rf sys_sdk-$(MLNX_SDK_VERSION)-$(MLNX_SDK_ISSU_VERSION)
 
 	wget -c $(MLNX_SDK_SOURCE_BASE_URL)/$(PACKAGE_NAME)-$(MLNX_SDK_VERSION)-$(MLNX_SDK_ISSU_VERSION).tar.gz -O - | tar -xz
 
 	# build
+
 	pushd $(PACKAGE_NAME)-$(MLNX_SDK_VERSION)-$(MLNX_SDK_ISSU_VERSION)
 
-	if [ -f autogen.sh ]; then
-		./autogen.sh
-	fi
+	cmake -B builds/cmake -DSKIP_UNINSTALL_INSTALL_DEPENDENCY=on -DSKIP_DEPMOD_IN_INSTALL_PHASE=on -DUSE_API_TESTER=OFF -DCMAKE_PROJECT_VERSION=$(MLNX_SDK_DEB_VERSION)
 
-	debuild -e PYTHON_INTERPRETERS="\"python2 python3\"" -b -us -uc -j$(SONIC_CONFIG_MAKE_JOBS)
+	cmake --build builds/cmake -j10
+
+	cd builds/cmake
+
+	cpack -G DEB 
 
 	popd
 
