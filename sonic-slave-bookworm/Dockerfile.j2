@@ -300,7 +300,6 @@ RUN apt-get update && apt-get install -y \
         procmail \
 # For gtest
         libgtest-dev \
-        cmake \
 # For gmock
         libgmock-dev \
 # For pam_tacplus build
@@ -421,6 +420,13 @@ RUN apt-get update && apt-get install -y \
         libprotobuf-dev \
 # For sonic-dhcp6relay build
         libjsoncpp-dev
+
+# Upgrade CMAKE version
+RUN wget https://github.com/Kitware/CMake/releases/download/v3.27.6/cmake-3.27.6-linux-x86_64.sh
+RUN chmod +x cmake-3.27.6-linux-x86_64.sh
+RUN sudo ./cmake-3.27.6-linux-x86_64.sh --skip-license --prefix=/usr
+RUN sudo apt-get update -y
+RUN sudo apt-get install -y libnl-genl-3-dev
 
 {%- if CROSS_BUILD_ENVIRON == "y" %}
 # Arm vs. amd64 versions conflict - remove amd64 packages
