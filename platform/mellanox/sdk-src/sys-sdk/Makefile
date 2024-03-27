@@ -7,7 +7,6 @@ DERIVED_TARGETS = sys-sdk_1.mlnx.$(MLNX_SDK_DEB_VERSION)_$(CONFIGURED_ARCH)-dev.
 PACKAGE_NAME = sys_sdk
 
 $(addprefix $(DEST)/, $(MAIN_TARGET)): $(DEST)/% :
-
         # get sources
 	rm -rf $(PACKAGE_NAME)-$(MLNX_SDK_VERSION)-$(MLNX_SDK_ISSU_VERSION)
 	
@@ -16,7 +15,6 @@ $(addprefix $(DEST)/, $(MAIN_TARGET)): $(DEST)/% :
 	wget -c $(MLNX_SDK_SOURCE_BASE_URL)/$(PACKAGE_NAME)-$(MLNX_SDK_VERSION)-$(MLNX_SDK_ISSU_VERSION).tar.gz -O - | tar -xz
 
         # build
-
 	rm -rf builds/cmake
 
 	cmake -B builds/cmake -DPYTHON_INTERPRETERS=python3 -DSKIP_UNINSTALL_INSTALL_DEPENDENCY=on -DSKIP_DEPMOD_IN_INSTALL_PHASE=on -DUSE_API_TESTER=OFF -DUSE_KERNEL=OFF -DCMAKE_PROJECT_VERSION=$(MLNX_SDK_DEB_VERSION)
