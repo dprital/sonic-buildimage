@@ -155,7 +155,7 @@ class FanUtil(FanBase):
             if val.isalpha():
                 frpm = 0
             else:
-                frpm = int(val)
+                frpm = int(float(val))
 
             ret += "FAN-%d\t\t\t%d\n" % (i, frpm)
 
