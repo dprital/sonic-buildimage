@@ -1,0 +1,1 @@
+../../x86_64-mlnx_mqm9700-r0/plugins/eeprom.py

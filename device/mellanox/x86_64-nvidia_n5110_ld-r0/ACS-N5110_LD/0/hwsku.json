@@ -1,0 +1,172 @@
+{
+    "interfaces": {
+        "Infiniband0": {
+            "default_brkout_mode": "2x400G[400G]"
+        },
+        "Infiniband4": {
+            "default_brkout_mode": "2x400G[400G]"
+        },
+        "Infiniband8": {
+            "default_brkout_mode": "2x400G[400G]"
+        },
+        "Infiniband12": {
+            "default_brkout_mode": "2x400G[400G]"
+        },
+        "Infiniband16": {
+            "default_brkout_mode": "2x400G[400G]"
+        },
+        "Infiniband20": {
+            "default_brkout_mode": "2x400G[400G]"
+        },
+        "Infiniband24": {
+            "default_brkout_mode": "2x400G[400G]"
+        },
+        "Infiniband28": {
+            "default_brkout_mode": "2x400G[400G]"
+        },
+        "Infiniband32": {
+            "default_brkout_mode": "2x400G[400G]"
+        },
+        "Infiniband36": {
+            "default_brkout_mode": "2x400G[400G]"
+        },
+        "Infiniband40": {
+            "default_brkout_mode": "2x400G[400G]"
+        },
+        "Infiniband44": {
+            "default_brkout_mode": "2x400G[400G]"
+        },
+        "Infiniband48": {
+            "default_brkout_mode": "2x400G[400G]"
+        },
+        "Infiniband52": {
+            "default_brkout_mode": "2x400G[400G]"
+        },
+        "Infiniband56": {
+            "default_brkout_mode": "2x400G[400G]"
+        },
+        "Infiniband60": {
+            "default_brkout_mode": "2x400G[400G]"
+        },
+        "Infiniband64": {
+            "default_brkout_mode": "2x400G[400G]"
+        },
+        "Infiniband68": {
+            "default_brkout_mode": "2x400G[400G]"
+        },
+        "Infiniband144": {
+            "default_brkout_mode": "1x800G[800G]"
+        },
+        "Infiniband146": {
+            "default_brkout_mode": "1x800G[800G]"
+        },
+        "Infiniband148": {
+            "default_brkout_mode": "1x800G[800G]"
+        },
+        "Infiniband150": {
+            "default_brkout_mode": "1x800G[800G]"
+        },
+        "Infiniband152": {
+            "default_brkout_mode": "1x800G[800G]"
+        },
+        "Infiniband154": {
+            "default_brkout_mode": "1x800G[800G]"
+        },
+        "Infiniband156": {
+            "default_brkout_mode": "1x800G[800G]"
+        },
+        "Infiniband158": {
+            "default_brkout_mode": "1x800G[800G]"
+        },
+        "Infiniband160": {
+            "default_brkout_mode": "1x800G[800G]"
+        },
+        "Infiniband162": {
+            "default_brkout_mode": "1x800G[800G]"
+        },
+        "Infiniband164": {
+            "default_brkout_mode": "1x800G[800G]"
+        },
+        "Infiniband166": {
+            "default_brkout_mode": "1x800G[800G]"
+        },
+        "Infiniband168": {
+            "default_brkout_mode": "1x800G[800G]"
+        },
+        "Infiniband170": {
+            "default_brkout_mode": "1x800G[800G]"
+        },
+        "Infiniband172": {
+            "default_brkout_mode": "1x800G[800G]"
+        },
+        "Infiniband174": {
+            "default_brkout_mode": "1x800G[800G]"
+        },
+        "Infiniband176": {
+            "default_brkout_mode": "1x800G[800G]"
+        },
+        "Infiniband178": {
+            "default_brkout_mode": "1x800G[800G]"
+        },
+        "Infiniband180": {
+            "default_brkout_mode": "1x800G[800G]"
+        },
+        "Infiniband182": {
+            "default_brkout_mode": "1x800G[800G]"
+        },
+        "Infiniband184": {
+            "default_brkout_mode": "1x800G[800G]"
+        },
+        "Infiniband186": {
+            "default_brkout_mode": "1x800G[800G]"
+        },
+        "Infiniband188": {
+            "default_brkout_mode": "1x800G[800G]"
+        },
+        "Infiniband190": {
+            "default_brkout_mode": "1x800G[800G]"
+        },
+        "Infiniband192": {
+            "default_brkout_mode": "1x800G[800G]"
+        },
+        "Infiniband194": {
+            "default_brkout_mode": "1x800G[800G]"
+        },
+        "Infiniband196": {
+            "default_brkout_mode": "1x800G[800G]"
+        },
+        "Infiniband198": {
+            "default_brkout_mode": "1x800G[800G]"
+        },
+        "Infiniband200": {
+            "default_brkout_mode": "1x800G[800G]"
+        },
+        "Infiniband202": {
+            "default_brkout_mode": "1x800G[800G]"
+        },
+        "Infiniband204": {
+            "default_brkout_mode": "1x800G[800G]"
+        },
+        "Infiniband206": {
+            "default_brkout_mode": "1x800G[800G]"
+        },
+        "Infiniband208": {
+            "default_brkout_mode": "1x800G[800G]"
+        },
+        "Infiniband210": {
+            "default_brkout_mode": "1x800G[800G]"
+        },
+        "Infiniband212": {
+            "default_brkout_mode": "1x800G[800G]"
+        },
+        "Infiniband214": {
+            "default_brkout_mode": "1x800G[800G]"
+        },
+        "Infiniband288": {
+            "default_brkout_mode": "1x200G[200G]"
+        },
+        "Infiniband290": {
+            "default_brkout_mode": "1x200G[200G]"
+        }
+    }
+}

@@ -1,0 +1,20 @@
+{
+    "services_to_ignore": ["rsyslog", "syncd", "ibcfgd", "redis", "orchagent", "portsyncd", "portmgrd"],
+    "services_to_wait": ["ntp-config", "interfaces-config", "usercfgd", "configmgrd", "portsyncmgrd", "clusterd"],
+    "critical_health_components": [
+        "LEAKAGE-1",
+        "LEAKAGE-2",
+        "LEAKAGE-3",
+        "LEAKAGE-4"
+    ],
+    "services_to_report_app_status": ["configmgrd", "portsyncmgrd", "clusterd"],
+    "timeout": 10,
+    "devices_to_ignore": ["psu"],
+    "user_defined_checkers": [],
+    "polling_interval": 3,
+    "led_color": {
+        "fault": "orange",
+        "normal": "green",
+        "booting": "orange_blink"
+    }
+}

@@ -1,0 +1,1069 @@
+{
+    "interfaces": {
+        "Infiniband0": {
+            "index": "1,1,1,1",
+            "lanes": "72,73,74,75",
+            "asic": "0,0,0,0",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["sw1p1"],
+                "2x400G[400G]": ["sw1p1s1","sw1p1s2"]
+            }
+        },
+        "Infiniband4": {
+            "index": "1,1,1,1",
+            "lanes": "76,77,78,79",
+            "asic": "0,0,0,0",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["sw1p2"],
+                "2x400G[400G]": ["sw1p2s1","sw1p2s2"]
+            }
+        },
+        "Infiniband8": {
+            "index": "2,2,2,2",
+            "lanes": "80,81,82,83",
+            "asic": "0,0,0,0",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["sw2p1"],
+                "2x400G[400G]": ["sw2p1s1","sw2p1s2"]
+            }
+        },
+        "Infiniband12": {
+            "index": "2,2,2,2",
+            "lanes": "84,85,86,87",
+            "asic": "0,0,0,0",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["sw2p2"],
+                "2x400G[400G]": ["sw2p2s1","sw2p2s2"]
+            }
+        },
+        "Infiniband16": {
+            "index": "3,3,3,3",
+            "lanes": "88,89,90,91",
+            "asic": "0,0,0,0",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["sw3p1"],
+                "2x400G[400G]": ["sw3p1s1","sw3p1s2"]
+            }
+        },
+        "Infiniband20": {
+            "index": "3,3,3,3",
+            "lanes": "92,93,94,95",
+            "asic": "0,0,0,0",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["sw3p2"],
+                "2x400G[400G]": ["sw3p2s1","sw3p2s2"]
+            }
+        },
+        "Infiniband24": {
+            "index": "4,4,4,4",
+            "lanes": "96,97,98,99",
+            "asic": "0,0,0,0",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["sw4p1"],
+                "2x400G[400G]": ["sw4p1s1","sw4p1s2"]
+            }
+        },
+        "Infiniband28": {
+            "index": "4,4,4,4",
+            "lanes": "100,101,102,103",
+            "asic": "0,0,0,0",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["sw4p2"],
+                "2x400G[400G]": ["sw4p2s1","sw4p2s2"]
+            }
+        },
+        "Infiniband32": {
+            "index": "5,5,5,5",
+            "lanes": "104,105,106,107",
+            "asic": "0,0,0,0",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["sw5p1"],
+                "2x400G[400G]": ["sw5p1s1","sw5p1s2"]
+            }
+        },
+        "Infiniband36": {
+            "index": "5,5,5,5",
+            "lanes": "108,109,110,111",
+            "asic": "0,0,0,0",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["sw5p2"],
+                "2x400G[400G]": ["sw5p2s1","sw5p2s2"]
+            }
+        },
+        "Infiniband40": {
+            "index": "6,6,6,6",
+            "lanes": "112,113,114,115",
+            "asic": "0,0,0,0",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["sw6p1"],
+                "2x400G[400G]": ["sw6p1s1","sw6p1s2"]
+            }
+        },
+        "Infiniband44": {
+            "index": "6,6,6,6",
+            "lanes": "116,117,118,119",
+            "asic": "0,0,0,0",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["sw6p2"],
+                "2x400G[400G]": ["sw6p2s1","sw6p2s2"]
+            }
+        },
+        "Infiniband48": {
+            "index": "7,7,7,7",
+            "lanes": "120,121,122,123",
+            "asic": "0,0,0,0",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["sw7p1"],
+                "2x400G[400G]": ["sw7p1s1","sw7p1s2"]
+            }
+        },
+        "Infiniband52": {
+            "index": "7,7,7,7",
+            "lanes": "124,125,126,127",
+            "asic": "0,0,0,0",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["sw7p2"],
+                "2x400G[400G]": ["sw7p2s1","sw7p2s2"]
+            }
+        },
+        "Infiniband56": {
+            "index": "8,8,8,8",
+            "lanes": "128,129,130,131",
+            "asic": "0,0,0,0",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["sw8p1"],
+                "2x400G[400G]": ["sw8p1s1","sw8p1s2"]
+            }
+        },
+        "Infiniband60": {
+            "index": "8,8,8,8",
+            "lanes": "132,133,134,135",
+            "asic": "0,0,0,0",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["sw8p2"],
+                "2x400G[400G]": ["sw8p2s1","sw8p2s2"]
+            }
+        },
+        "Infiniband64": {
+            "index": "9,9,9,9",
+            "lanes": "136,137,138,139",
+            "asic": "0,0,0,0",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["sw9p1"],
+                "2x400G[400G]": ["sw9p1s1","sw9p1s2"]
+            }
+        },
+        "Infiniband68": {
+            "index": "9,9,9,9",
+            "lanes": "140,141,142,143",
+            "asic": "0,0,0,0",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["sw9p2"],
+                "2x400G[400G]": ["sw9p2s1","sw9p2s2"]
+            }
+        },
+        "Infiniband72": {
+            "index": "10,10,10,10",
+            "lanes": "72,73,74,75",
+            "asic": "1,1,1,1",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["sw10p1"],
+                "2x400G[400G]": ["sw10p1s1","sw10p1s2"]
+            }
+        },
+        "Infiniband76": {
+            "index": "10,10,10,10",
+            "lanes": "76,77,78,79",
+            "asic": "1,1,1,1",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["sw10p2"],
+                "2x400G[400G]": ["sw10p2s1","sw10p2s2"]
+            }
+        },
+        "Infiniband80": {
+            "index": "11,11,11,11",
+            "lanes": "80,81,82,83",
+            "asic": "1,1,1,1",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["sw11p1"],
+                "2x400G[400G]": ["sw11p1s1","sw11p1s2"]
+            }
+        },
+        "Infiniband84": {
+            "index": "11,11,11,11",
+            "lanes": "84,85,86,87",
+            "asic": "1,1,1,1",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["sw11p2"],
+                "2x400G[400G]": ["sw11p2s1","sw11p2s2"]
+            }
+        },
+        "Infiniband88": {
+            "index": "12,12,12,12",
+            "lanes": "88,89,90,91",
+            "asic": "1,1,1,1",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["sw12p1"],
+                "2x400G[400G]": ["sw12p1s1","sw12p1s2"]
+            }
+        },
+        "Infiniband92": {
+            "index": "12,12,12,12",
+            "lanes": "92,93,94,95",
+            "asic": "1,1,1,1",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["sw12p2"],
+                "2x400G[400G]": ["sw12p2s1","sw12p2s2"]
+            }
+        },
+        "Infiniband96": {
+            "index": "13,13,13,13",
+            "lanes": "96,97,98,99",
+            "asic": "1,1,1,1",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["sw13p1"],
+                "2x400G[400G]": ["sw13p1s1","sw13p1s2"]
+            }
+        },
+        "Infiniband100": {
+            "index": "13,13,13,13",
+            "lanes": "100,101,102,103",
+            "asic": "1,1,1,1",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["sw13p2"],
+                "2x400G[400G]": ["sw13p2s1","sw13p2s2"]
+            }
+        },
+        "Infiniband104": {
+            "index": "14,14,14,14",
+            "lanes": "104,105,106,107",
+            "asic": "1,1,1,1",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["sw14p1"],
+                "2x400G[400G]": ["sw14p1s1","sw14p1s2"]
+            }
+        },
+        "Infiniband108": {
+            "index": "14,14,14,14",
+            "lanes": "108,109,110,111",
+            "asic": "1,1,1,1",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["sw14p2"],
+                "2x400G[400G]": ["sw14p2s1","sw14p2s2"]
+            }
+        },
+        "Infiniband112": {
+            "index": "15,15,15,15",
+            "lanes": "112,113,114,115",
+            "asic": "1,1,1,1",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["sw15p1"],
+                "2x400G[400G]": ["sw15p1s1","sw15p1s2"]
+            }
+        },
+        "Infiniband116": {
+            "index": "15,15,15,15",
+            "lanes": "116,117,118,119",
+            "asic": "1,1,1,1",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["sw15p2"],
+                "2x400G[400G]": ["sw15p2s1","sw15p2s2"]
+            }
+        },
+        "Infiniband120": {
+            "index": "16,16,16,16",
+            "lanes": "120,121,122,123",
+            "asic": "1,1,1,1",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["sw16p1"],
+                "2x400G[400G]": ["sw16p1s1","sw16p1s2"]
+            }
+        },
+        "Infiniband124": {
+            "index": "16,16,16,16",
+            "lanes": "124,125,126,127",
+            "asic": "1,1,1,1",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["sw16p2"],
+                "2x400G[400G]": ["sw16p2s1","sw16p2s2"]
+            }
+        },
+        "Infiniband128": {
+            "index": "17,17,17,17",
+            "lanes": "128,129,130,131",
+            "asic": "1,1,1,1",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["sw17p1"],
+                "2x400G[400G]": ["sw17p1s1","sw17p1s2"]
+            }
+        },
+        "Infiniband132": {
+            "index": "17,17,17,17",
+            "lanes": "132,133,134,135",
+            "asic": "1,1,1,1",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["sw17p2"],
+                "2x400G[400G]": ["sw17p2s1","sw17p2s2"]
+            }
+        },
+        "Infiniband136": {
+            "index": "18,18,18,18",
+            "lanes": "136,137,138,139",
+            "asic": "1,1,1,1",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["sw18p1"],
+                "2x400G[400G]": ["sw18p1s1","sw18p1s2"]
+            }
+        },
+        "Infiniband140": {
+            "index": "18,18,18,18",
+            "lanes": "140,141,142,143",
+            "asic": "1,1,1,1",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["sw18p2"],
+                "2x400G[400G]": ["sw18p2s1","sw18p2s2"]
+            }
+        },
+        "Infiniband144": {
+            "index": "99,99",
+            "lanes": "0,1",
+            "asic": "0,0",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp1"]
+            }
+        },
+        "Infiniband146": {
+            "index": "99,99",
+            "lanes": "2,3",
+            "asic": "0,0",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp2"]
+            }
+        },
+        "Infiniband148": {
+            "index": "99,99",
+            "lanes": "4,5",
+            "asic": "0,0",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp3"]
+            }
+        },
+        "Infiniband150": {
+            "index": "99,99",
+            "lanes": "6,7",
+            "asic": "0,0",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp4"]
+            }
+        },
+        "Infiniband152": {
+            "index": "99,99",
+            "lanes": "8,9",
+            "asic": "0,0",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp5"]
+            }
+        },
+        "Infiniband154": {
+            "index": "99,99",
+            "lanes": "10,11",
+            "asic": "0,0",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp6"]
+            }
+        },
+        "Infiniband156": {
+            "index": "99,99",
+            "lanes": "12,13",
+            "asic": "0,0",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp7"]
+            }
+        },
+        "Infiniband158": {
+            "index": "99,99",
+            "lanes": "14,15",
+            "asic": "0,0",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp8"]
+            }
+        },
+        "Infiniband160": {
+            "index": "99,99",
+            "lanes": "16,17",
+            "asic": "0,0",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp9"]
+            }
+        },
+        "Infiniband162": {
+            "index": "99,99",
+            "lanes": "18,19",
+            "asic": "0,0",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp10"]
+            }
+        },
+        "Infiniband164": {
+            "index": "99,99",
+            "lanes": "20,21",
+            "asic": "0,0",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp11"]
+            }
+        },
+        "Infiniband166": {
+            "index": "99,99",
+            "lanes": "22,23",
+            "asic": "0,0",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp12"]
+            }
+        },
+        "Infiniband168": {
+            "index": "99,99",
+            "lanes": "24,25",
+            "asic": "0,0",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp13"]
+            }
+        },
+        "Infiniband170": {
+            "index": "99,99",
+            "lanes": "26,27",
+            "asic": "0,0",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp14"]
+            }
+        },
+        "Infiniband172": {
+            "index": "99,99",
+            "lanes": "28,29",
+            "asic": "0,0",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp15"]
+            }
+        },
+        "Infiniband174": {
+            "index": "99,99",
+            "lanes": "30,31",
+            "asic": "0,0",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp16"]
+            }
+        },
+        "Infiniband176": {
+            "index": "99,99",
+            "lanes": "32,33",
+            "asic": "0,0",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp17"]
+            }
+        },
+        "Infiniband178": {
+            "index": "99,99",
+            "lanes": "34,35",
+            "asic": "0,0",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp18"]
+            }
+        },
+        "Infiniband180": {
+            "index": "99,99",
+            "lanes": "36,37",
+            "asic": "0,0",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp19"]
+            }
+        },
+        "Infiniband182": {
+            "index": "99,99",
+            "lanes": "38,39",
+            "asic": "0,0",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp20"]
+            }
+        },
+        "Infiniband184": {
+            "index": "99,99",
+            "lanes": "40,41",
+            "asic": "0,0",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp21"]
+            }
+        },
+        "Infiniband186": {
+            "index": "99,99",
+            "lanes": "42,43",
+            "asic": "0,0",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp22"]
+            }
+        },
+        "Infiniband188": {
+            "index": "99,99",
+            "lanes": "44,45",
+            "asic": "0,0",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp23"]
+            }
+        },
+        "Infiniband190": {
+            "index": "99,99",
+            "lanes": "46,47",
+            "asic": "0,0",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp24"]
+            }
+        },
+        "Infiniband192": {
+            "index": "99,99",
+            "lanes": "48,49",
+            "asic": "0,0",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp25"]
+            }
+        },
+        "Infiniband194": {
+            "index": "99,99",
+            "lanes": "50,51",
+            "asic": "0,0",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp26"]
+            }
+        },
+        "Infiniband196": {
+            "index": "99,99",
+            "lanes": "52,53",
+            "asic": "0,0",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp27"]
+            }
+        },
+        "Infiniband198": {
+            "index": "99,99",
+            "lanes": "54,55",
+            "asic": "0,0",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp28"]
+            }
+        },
+        "Infiniband200": {
+            "index": "99,99",
+            "lanes": "56,57",
+            "asic": "0,0",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp29"]
+            }
+        },
+        "Infiniband202": {
+            "index": "99,99",
+            "lanes": "58,59",
+            "asic": "0,0",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp30"]
+            }
+        },
+        "Infiniband204": {
+            "index": "99,99",
+            "lanes": "60,61",
+            "asic": "0,0",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp31"]
+            }
+        },
+        "Infiniband206": {
+            "index": "99,99",
+            "lanes": "62,63",
+            "asic": "0,0",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp32"]
+            }
+        },
+        "Infiniband208": {
+            "index": "99,99",
+            "lanes": "64,65",
+            "asic": "0,0",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp33"]
+            }
+        },
+        "Infiniband210": {
+            "index": "99,99",
+            "lanes": "66,67",
+            "asic": "0,0",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp34"]
+            }
+        },
+        "Infiniband212": {
+            "index": "99,99",
+            "lanes": "68,69",
+            "asic": "0,0",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp35"]
+            }
+        },
+        "Infiniband214": {
+            "index": "99,99",
+            "lanes": "70,71",
+            "asic": "0,0",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp36"]
+            }
+        },
+        "Infiniband216": {
+            "index": "99,99",
+            "lanes": "0,1",
+            "asic": "1,1",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp37"]
+            }
+        },
+        "Infiniband218": {
+            "index": "99,99",
+            "lanes": "2,3",
+            "asic": "1,1",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp38"]
+            }
+        },
+        "Infiniband220": {
+            "index": "99,99",
+            "lanes": "4,5",
+            "asic": "1,1",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp39"]
+            }
+        },
+        "Infiniband222": {
+            "index": "99,99",
+            "lanes": "6,7",
+            "asic": "1,1",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp40"]
+            }
+        },
+        "Infiniband224": {
+            "index": "99,99",
+            "lanes": "8,9",
+            "asic": "1,1",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp41"]
+            }
+        },
+        "Infiniband226": {
+            "index": "99,99",
+            "lanes": "10,11",
+            "asic": "1,1",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp42"]
+            }
+        },
+        "Infiniband228": {
+            "index": "99,99",
+            "lanes": "12,13",
+            "asic": "1,1",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp43"]
+            }
+        },
+        "Infiniband230": {
+            "index": "99,99",
+            "lanes": "14,15",
+            "asic": "1,1",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp44"]
+            }
+        },
+        "Infiniband232": {
+            "index": "99,99",
+            "lanes": "16,17",
+            "asic": "1,1",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp45"]
+            }
+        },
+        "Infiniband234": {
+            "index": "99,99",
+            "lanes": "18,19",
+            "asic": "1,1",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp46"]
+            }
+        },
+        "Infiniband236": {
+            "index": "99,99",
+            "lanes": "20,21",
+            "asic": "1,1",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp47"]
+            }
+        },
+        "Infiniband238": {
+            "index": "99,99",
+            "lanes": "22,23",
+            "asic": "1,1",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp48"]
+            }
+        },
+        "Infiniband240": {
+            "index": "99,99",
+            "lanes": "24,25",
+            "asic": "1,1",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp49"]
+            }
+        },
+        "Infiniband242": {
+            "index": "99,99",
+            "lanes": "26,27",
+            "asic": "1,1",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp50"]
+            }
+        },
+        "Infiniband244": {
+            "index": "99,99",
+            "lanes": "28,29",
+            "asic": "1,1",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp51"]
+            }
+        },
+        "Infiniband246": {
+            "index": "99,99",
+            "lanes": "30,31",
+            "asic": "1,1",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp52"]
+            }
+        },
+        "Infiniband248": {
+            "index": "99,99",
+            "lanes": "32,33",
+            "asic": "1,1",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp53"]
+            }
+        },
+        "Infiniband250": {
+            "index": "99,99",
+            "lanes": "34,35",
+            "asic": "1,1",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp54"]
+            }
+        },
+        "Infiniband252": {
+            "index": "99,99",
+            "lanes": "36,37",
+            "asic": "1,1",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp55"]
+            }
+        },
+        "Infiniband254": {
+            "index": "99,99",
+            "lanes": "38,39",
+            "asic": "1,1",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp56"]
+            }
+        },
+        "Infiniband256": {
+            "index": "99,99",
+            "lanes": "40,41",
+            "asic": "1,1",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp57"]
+            }
+        },
+        "Infiniband258": {
+            "index": "99,99",
+            "lanes": "42,43",
+            "asic": "1,1",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp58"]
+            }
+        },
+        "Infiniband260": {
+            "index": "99,99",
+            "lanes": "44,45",
+            "asic": "1,1",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp59"]
+            }
+        },
+        "Infiniband262": {
+            "index": "99,99",
+            "lanes": "46,47",
+            "asic": "1,1",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp60"]
+            }
+        },
+        "Infiniband264": {
+            "index": "99,99",
+            "lanes": "48,49",
+            "asic": "1,1",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp61"]
+            }
+        },
+        "Infiniband266": {
+            "index": "99,99",
+            "lanes": "50,51",
+            "asic": "1,1",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp62"]
+            }
+        },
+        "Infiniband268": {
+            "index": "99,99",
+            "lanes": "52,53",
+            "asic": "1,1",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp63"]
+            }
+        },
+        "Infiniband270": {
+            "index": "99,99",
+            "lanes": "54,55",
+            "asic": "1,1",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp64"]
+            }
+        },
+        "Infiniband272": {
+            "index": "99,99",
+            "lanes": "56,57",
+            "asic": "1,1",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp65"]
+            }
+        },
+        "Infiniband274": {
+            "index": "99,99",
+            "lanes": "58,59",
+            "asic": "1,1",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp66"]
+            }
+        },
+        "Infiniband276": {
+            "index": "99,99",
+            "lanes": "60,61",
+            "asic": "1,1",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp67"]
+            }
+        },
+        "Infiniband278": {
+            "index": "99,99",
+            "lanes": "62,63",
+            "asic": "1,1",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp68"]
+            }
+        },
+        "Infiniband280": {
+            "index": "99,99",
+            "lanes": "64,65",
+            "asic": "1,1",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp69"]
+            }
+        },
+        "Infiniband282": {
+            "index": "99,99",
+            "lanes": "66,67",
+            "asic": "1,1",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp70"]
+            }
+        },
+        "Infiniband284": {
+            "index": "99,99",
+            "lanes": "68,69",
+            "asic": "1,1",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp71"]
+            }
+        },
+        "Infiniband286": {
+            "index": "99,99",
+            "lanes": "70,71",
+            "asic": "1,1",
+            "adv_speeds": ["800000"],
+            "breakout_modes": {
+                "1x800G[800G]": ["acp72"]
+            }
+        },
+        "Infiniband288": {
+            "index": "99,99",
+            "lanes": "144,145",
+            "asic": "0,0",
+            "adv_speeds": ["10000,200000"],
+            "breakout_modes": {
+                "1x200G[200G]": ["fnm1"]
+            }
+        },
+        "Infiniband290": {
+            "index": "99,99",
+            "lanes": "146,147",
+            "asic": "0,0",
+            "adv_speeds": ["10000,200000"],
+            "hidden": "true",
+            "breakout_modes": {
+                "1x200G[200G]": ["fnma0p1"]
+            }
+        },
+        "Infiniband292": {
+            "index": "99,99",
+            "lanes": "144,145",
+            "asic": "1,1",
+            "adv_speeds": ["10000,200000"],
+            "breakout_modes": {
+                "1x200G[200G]": ["fnm2"]
+            }
+        },
+        "Infiniband294": {
+            "index": "99,99",
+            "lanes": "146,147",
+            "asic": "1,1",
+            "adv_speeds": ["10000,200000"],
+            "hidden": "true",
+            "breakout_modes": {
+                "1x200G[200G]": ["fnma1p1"]
+            }
+        }
+    },
+    "capabilities": {
+        "breakout-profile-change-allowed":"no",
+        "port-breakout-allowed":"no",
+        "breakout_type":"2X",
+        "ptp-supported":"no",
+        "user-setting-allowed":"no",
+        "sfp_count":"18",
+        "port_count":"146",
+        "transceiver_speed":"400G",
+        "transceiver_type":"OSFP",
+        "mgmt_if_count":"2",
+        "liquid-cooled": "yes",
+        "psu": "no",
+        "link-low-power-support": "yes",
+        "chassis-location-allowed": "yes",
+        "supports_power_cycle": "yes",
+        "extended-port-counters-supported":"yes",
+        "switch_system_type":"gb200"
+    }
+}

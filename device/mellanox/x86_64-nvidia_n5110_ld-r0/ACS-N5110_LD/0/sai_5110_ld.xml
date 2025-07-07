@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!--
+  Copyright (c) 2024 NVIDIA CORPORATION & AFFILIATES.
+
+  This software product is a proprietary product of Nvidia Corporation and
+  its affiliates (the "Company") and all right, title, and interest in and
+  to the software product, including all associated intellectual property
+  rights, are and shall remain exclusively with the Company.
+
+  This software product is governed by the End User License Agreement
+  provided with the software product.
+-->
+
+<root>
+	<platform_info type="5110_LD">
+
+		<!-- Device MAC address  -->
+		<device-mac-address>00:02:03:04:05:00</device-mac-address>
+
+		<!-- ISSU enabled -->
+		<issu-enabled>0</issu-enabled>
+
+		<!-- Number of ports in the following port list -->
+		<number-of-physical-ports>0</number-of-physical-ports>
+
+		<!-- List of ports in the device -->
+		<ports-list>
+		</ports-list>
+	</platform_info>
+</root>
