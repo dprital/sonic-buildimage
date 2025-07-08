@@ -23,9 +23,11 @@
 #
 #############################################################################
 
+
 try:
     from sonic_platform_base.chassis_base import ChassisBase
     from sonic_py_common.logger import Logger
+    from sonic_py_common.device_info import get_bmc_data
     import os
     from sonic_py_common import device_info
     from functools import reduce
@@ -33,6 +35,7 @@ try:
     from . import module_host_mgmt_initializer
     from . import utils
     from .device_data import DeviceDataManager
+    from .bmc import BMC
     import re
     import select
     import threading
@@ -125,6 +128,10 @@ class Chassis(ChassisBase):
         self.module_host_mgmt_initializer = module_host_mgmt_initializer.ModuleHostMgmtInitializer()
         self.poll_obj = None
         self.registered_fds = None
+
+        self._bmc = None
+        self._bmc_data = None
+        self._bmc_initialized = False
 
         logger.log_info("Chassis loaded successfully")
 
@@ -802,6 +809,11 @@ class Chassis(ChassisBase):
             self._component_list.append(ComponentSSD())
             self._component_list.append(DeviceDataManager.get_bios_component())
             self._component_list.extend(DeviceDataManager.get_cpld_component_list())
+        
+        # Initialize BMC and its components
+        self.initialize_bmc()
+
+        # TODO(BMC): verify if need to self.initialize_fw_dir()
 
     def get_num_components(self):
         """
@@ -1084,6 +1096,35 @@ class Chassis(ChassisBase):
             bool: True if it is replaceable.
         """
         return False
+
+    def initialize_bmc(self):
+        if self._bmc_initialized:
+            return
+
+        self._bmc_data = get_bmc_data()
+
+        if self._bmc_data:
+            self._bmc = BMC.get_instance()
+
+            try:
+                bmc_comp_list = self._bmc.get_component_list()
+                self._component_list.extend(bmc_comp_list)
+            except Exception as e:
+                logger.log_error("Fail to get BMC component list")
+
+        self._bmc_initialized = True
+
+    def _initialize_bmc(self):
+        self.initialize_components()
+        self.initialize_bmc()
+
+    def get_bmc_data(self):
+        self._initialize_bmc()
+        return self._bmc_data
+
+    def get_bmc(self):
+        self._initialize_bmc()
+        return self._bmc
 
 
 class ModularChassis(Chassis):

@@ -909,6 +909,21 @@ class ComponentCPLDSN2201(ComponentCPLD):
 
         return True
 
+
+# TODO(BMC): Verify which classes and functions are needed for BMC components
+# And check the usage on them in load_system_info and platform_components.json
+
+# class ComponentBMCObj(Component)
+
+# class ComponentBMC(ComponentBMCObj)
+
+# class ComponentFPGAOnBMC(ComponentBMCObj)
+
+# class ComponentERoTOnBMC(ComponentBMCObj)
+
+# class ComponentBIOSOnBMC(ComponentBMCObj)
+
+
 class ComponentCPLDSN4280(ComponentCPLD):
     CPLD_FIRMWARE_UPDATE_COMMAND = ['cpldupdate', '--gpio', '--print-progress', '']
 
