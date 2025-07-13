@@ -7,9 +7,11 @@ import sys
 
 # Global variable
 PORT_ATTRIBUTES = ["index", "lanes", "breakout_modes"]
+OPTIONAL_PORT_ATTRIBUTES = ["asic", "adv_speeds", "planarized_ports", "aport_number", "hidden", "description"]
 ATTR_LEN = len(PORT_ATTRIBUTES)
-#PORT_REG = "Ethernet(\d+)"
-PORT_REG = "Infiniband(\d+)"
+OPTIONAL_ATTR_LEN = len(OPTIONAL_PORT_ATTRIBUTES)
+# PORT_REG should be taken from scheme.h FRONT_PANEL_PORT_PREFIX_REGEX
+PORT_REG = "(Ethernet|Infiniband)(\d+)"
 PLATFORM_JSON = '*platform.json'
 INTF_KEY = "interfaces"
 CHASSIS_KEY = "chassis"
@@ -88,8 +90,9 @@ def check_chassis_dict(chassis_dict):
 
 
 def check_port_attr(port_attr):
+
     for each_key in port_attr:
-        if each_key not in PORT_ATTRIBUTES:
+        if each_key not in PORT_ATTRIBUTES and each_key not in OPTIONAL_PORT_ATTRIBUTES:
             print("Error: "+ each_key + " is not the correct Port attribute.")
             return False
 
@@ -101,6 +104,11 @@ def check_port_attr(port_attr):
             brkout_modes = port_attr[each_key]
             if not isinstance(brkout_modes, dict):
                 print("Error:value type of  "+ each_key + " must be dictionary.")
+                return False
+        elif each_key.lower() == "adv_speeds":
+            adv_speeds = port_attr[each_key]
+            if not isinstance(adv_speeds, list):
+                print("Error:value type of  "+ each_key + " must be list.")
                 return False
         else:
             if not isinstance(port_attr[each_key], str):
@@ -131,7 +139,7 @@ def check_file(platform_json_file):
             total_attr = len(list(port_dict[each_port].keys()))
             port_attr = port_dict[each_port]
 
-            if total_attr != ATTR_LEN:
+            if not (ATTR_LEN <= total_attr <= ATTR_LEN + OPTIONAL_ATTR_LEN):
                 missing_attr = ', '.join(set(PORT_ATTRIBUTES).difference(list(port_attr)))
                 print("Error: " + missing_attr + " of " + each_port + " is/are missing")
                 return False
