@@ -1,0 +1,64 @@
+#!/bin/bash
+
+#
+# SPDX-FileCopyrightText: NVIDIA CORPORATION & AFFILIATES
+# Copyright (c) 2020-2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: LicenseRef-NvidiaProprietary
+#
+# NVIDIA CORPORATION, its affiliates and licensors retain all intellectual
+# property and proprietary rights in and to this material, related
+# documentation and any modifications thereto. Any use, reproduction,
+# disclosure or distribution of this material and related documentation
+# without an express license agreement from NVIDIA CORPORATION or
+# its affiliates is strictly prohibited.
+#
+
+declare -r EXIT_SUCCESS="0"
+declare -r EXIT_ERROR="1"
+
+declare -r PENDING_COMPONENT_FW="/usr/bin/install-pending-fw.py"
+declare -r FW_UPGRADE_SCRIPT="/usr/bin/mlnx-fw-upgrade.sh"
+declare -r POWER_CYCLE_REQUIRED_FILE="/etc/power_cycle_required"
+
+FORCE_REBOOT="no"
+
+function ParseArguments() {
+    while [ $# -ge 1 ]; do
+        case "$1" in
+            -f|--force)
+                FORCE_REBOOT="yes"
+            ;;
+        esac
+        shift
+    done
+}
+
+ParseArguments "$@"
+
+# Reboot immediately if the kdump capture kernel is running
+# VMCORE_FILE=/proc/vmcore
+# if [ -s $VMCORE_FILE ]; then
+#     sync; sync
+#     umount -fa > /dev/null 2>&1
+
+#     # Run Debian reboot because the platform reboot isn't available
+#     /sbin/reboot
+# fi
+fw_upgrade_output=$(${FW_UPGRADE_SCRIPT} --upgrade --verbose)
+EXIT_CODE="$?"
+if [[ $(echo "$fw_upgrade_output" | tail -1) == "INFO: firmware upgrade is completed through BMC" ]]; then
+    sudo touch ${POWER_CYCLE_REQUIRED_FILE}
+fi
+
+if [[ "${EXIT_CODE}" != "${EXIT_SUCCESS}" ]]; then
+    echo "Failed to burn MLNX FW: errno=${EXIT_CODE}"
+
+    if [[ "${FORCE_REBOOT}" != "yes" ]]; then
+        echo "Reboot is interrupted: use -f|--force to override"
+        exit "${EXIT_ERROR}"
+    fi
+fi
+
+${PENDING_COMPONENT_FW}
+
+exit ${EXIT_SUCCESS}

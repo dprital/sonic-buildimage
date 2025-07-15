@@ -1,0 +1,69 @@
+#!/bin/bash
+
+#
+# SPDX-FileCopyrightText: NVIDIA CORPORATION & AFFILIATES
+# Copyright (c) 2020-2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: LicenseRef-NvidiaProprietary
+#
+# NVIDIA CORPORATION, its affiliates and licensors retain all intellectual
+# property and proprietary rights in and to this material, related
+# documentation and any modifications thereto. Any use, reproduction,
+# disclosure or distribution of this material and related documentation
+# without an express license agreement from NVIDIA CORPORATION or
+# its affiliates is strictly prohibited.
+#
+
+declare -r SYSFS_PWR_CYCLE="/var/run/hw-management/system/pwr_cycle"
+declare -r REDFISH_SYSTEM_RESET="/usr/bin/redfish_system_reset.py"
+declare -r BMC_PRESENT=$(sonic-db-cli CONFIG_DB exists "DEVICE_METADATA|bmc")
+declare -r POWER_CYCLE_REQUIRED_FILE="/etc/power_cycle_required"
+
+function SafePwrCycle() {
+    sync; sync
+
+    # We want to unmount everything (as we do umount -fa).
+    # But we will do it in a certain order so we don't have errors in log due to dependencies
+    umount -f /sys/fs/fuse/connections > /dev/null 2>&1
+    umount -f /sys/kernel/tracing > /dev/null 2>&1
+    umount -f /sys/kernel/config > /dev/null 2>&1
+
+    # W/A for Bug SW #4186764:
+    #
+    # This issue happens after https://gitlab-master.nvidia.com/nbu-sws/nos/nvos/-/merge_requests/2421.
+    # It is a matter of race condition in platform_reboot. The above MR changes the timing.
+    # From log, umount operations seem to be faster than before. Unmouting /dev/pts will
+    # cause nvued exit while it is executing the reboot script. Actually, 'do_system_reboot()'
+    # will be interrupted by OS signal in calling 'evt._ctx.sh.env(reboot_cmd)'. Hence reboot
+    # script may have no chance to send reset request to BMC.
+    # As W/A, /dev/pts is excluded from the following umount operations. /var/log is also
+    # kept since the scripts still needs to write logs.
+    #
+    # Note: Not sure why PTY device matters. safe_sh.py in NVUE core does not create PTY
+    # device. Neither does redfish_client.py. They both use Linux pipe internally.
+    #
+    # The root cause of this failure is that reboot script is synchronously executed in
+    # the context of nvued. It does not make sense. The reboot script might destroy the
+    # execution environment of nvued. Need future improvement here. An external service
+    # may be a better choice.
+
+    # Unmount everithing that is not proc or sys or cgoup or /var/log or /dev/pts
+    awk '$2 !~ "^/(proc|sys|cgroup|var/log|dev/pts)" { print $2 }' /etc/mtab | xargs -I{} umount -f {} > /dev/null 2>&1
+    # Unmount whatever is left
+    # umount -fa > /dev/null 2>&1
+    mount | awk '$3 !~ "^/(var/log|dev/pts)" { print $3 }' | xargs -I{} umount -f {} > /dev/null 2>&1
+
+    if [ $BMC_PRESENT == 1 ]; then
+        if [[ -f $POWER_CYCLE_REQUIRED_FILE ]]; then
+            echo "BMC detected, FW was installed, performing power cycle via BMC"
+            sudo rm -f $POWER_CYCLE_REQUIRED_FILE
+            ${REDFISH_SYSTEM_RESET} --power-cycle
+        else
+            echo "BMC detected, performing CPU reset via BMC"
+            ${REDFISH_SYSTEM_RESET}
+        fi
+    else
+        echo 1 > $SYSFS_PWR_CYCLE
+    fi
+}
+
+SafePwrCycle

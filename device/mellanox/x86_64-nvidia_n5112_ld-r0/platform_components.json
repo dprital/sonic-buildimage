@@ -1,0 +1,53 @@
+{
+    "chassis": {
+        "component": {
+            "ONIE": { },
+            "BMC": {
+                "managed_by": "BMC",
+                "id": "MGX_FW_BMC_0",
+                "eeprom_id": "BMC_eeprom",
+                "class": "ComponentBMC"
+            },
+            "SSD": { },
+            "BIOS": {
+                "managed_by": "BMC",
+                "id": "MGX_FW_CPU_0",
+                "class": "ComponentBIOSOnBMC"
+            },
+            "CPLD1": { },
+            "CPLD2": { },
+            "CPLD3": { },
+            "CPLD4": { },
+            "FPGA": {
+                "managed_by": "BMC",
+                "id": "MGX_FW_FPGA_0",
+                "class": "ComponentFPGAOnBMC"
+            },
+            "ERoT_BMC_0": {
+                "managed_by": "BMC",
+                "id": "MGX_FW_ERoT_BMC_0",
+                "class": "ComponentERoTOnBMC"
+            },
+            "ERoT_CPU_0": {
+                "managed_by": "BMC",
+                "id": "MGX_FW_ERoT_CPU_0",
+                "class": "ComponentERoTOnBMC"
+            },
+            "ERoT_FPGA_0": {
+                "managed_by": "BMC",
+                "id": "MGX_FW_ERoT_FPGA_0",
+                "class": "ComponentERoTOnBMC"
+            },
+            "ERoT_NVSwitch_0": {
+                "managed_by": "BMC",
+                "id": "MGX_FW_ERoT_NVSwitch_0",
+                "class": "ComponentERoTOnBMC"
+            },
+            "ERoT_NVSwitch_1": {
+                "managed_by": "BMC",
+                "id": "MGX_FW_ERoT_NVSwitch_1",
+                "class": "ComponentERoTOnBMC"
+            }
+        }
+    }
+}
