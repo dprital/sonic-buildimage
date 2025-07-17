@@ -93,6 +93,8 @@ sensord-dbgsym==1:3.6.0-7.1
 smartmontools==7.4-2~bpo12+1
 sshpass==1.09-1+b1
 strace==6.1-0.1
+tpm-udev==0.6
+tpm2-tools==5.4-1
 ucf==3.0043+nmu1+deb12u1
 udev==252.38-1~deb12u1
 uuid-runtime==2.38.1-5+deb12u3
