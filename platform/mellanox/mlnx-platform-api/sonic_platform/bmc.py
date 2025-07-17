@@ -1,6 +1,6 @@
 #
 # SPDX-FileCopyrightText: NVIDIA CORPORATION & AFFILIATES
-# Copyright (c) 2022-2024 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# Copyright (c) 2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -36,10 +36,25 @@ try:
     from . import utils
     import functools
     import filelock
+    import time
 except ImportError as e:
     raise ImportError (str(e) + "- required module not found")
 
+
 logger = Logger()
+
+
+def ping(host):
+    # Construct the ping command
+    # -c 1: Send only one packet
+    # -W 1: Wait 1 second for a response
+    command = ['/usr/bin/ping', '-c', '1', '-W', '1', host]
+
+    try:
+        subprocess.check_output(command, stderr=subprocess.STDOUT)
+        return True
+    except subprocess.CalledProcessError:
+        return False
 
 
 def under_lock(lockfile, timeout=2):
@@ -68,7 +83,7 @@ def with_credential_restore(api_func):
             # 'api_func()' will return code ERR_CODE_NOT_LOGIN, and the correct
             # type of additional data.
             self.login()
-        elif api_func.__name__ in ['update_firmware_on_component', 'update_firmware']:
+        elif api_func.__name__ == 'update_firmware':
             # W/A for the case when we need to install new FW (takes quite long
             # time). While this process, current token can be expired, so the code
             # to pool task status will fail. To prevent it - invalidate token and
@@ -101,8 +116,6 @@ class BMC(BMCBase):
     '''
 
     CURL_PATH = '/usr/bin/curl'
-    BMC_ADMIN_ACCOUNT = 'admin'
-    BMC_ADMIN_ACCOUNT_DEFAULT_PASSWORD = '0penBmc'
     BMC_NOS_ACCOUNT = 'yormnAnb'
     BMC_NOS_ACCOUNT_DEFAULT_PASSWORD = "ABYX12#14artb51"
     BMC_DIR = "/host/bmc"
@@ -115,9 +128,6 @@ class BMC(BMCBase):
     def __init__(self, addr):
 
         self.addr = addr
-        # Use the NOS account by default. If login fails with the NOS account
-        # then try with the admin account
-        self.using_nos_account = True
         # Login password will be default password while doing TPM password
         # recovery. This flag is used for Redfishclient callback to decide
         # which password to use in login()
@@ -126,7 +136,7 @@ class BMC(BMCBase):
 
         self.rf_client = RedfishClient(BMC.CURL_PATH,
                                         addr,
-                                        self.get_login_user,
+                                        BMC.BMC_NOS_ACCOUNT,
                                         self.get_password_callback,
                                         logger)
 
@@ -140,16 +150,9 @@ class BMC(BMCBase):
             BMC._instance = BMC(bmc_data['bmc_addr'])
 
         return BMC._instance
-    
-    # TODO(BMC): Implement the DeviceBase interface methods
 
     def get_ip_addr(self):
         return self.addr
-
-    def get_login_user(self):
-        if self.using_nos_account:
-            return BMC.BMC_NOS_ACCOUNT
-        return BMC.BMC_ADMIN_ACCOUNT
 
     # Password callback function passed to RedfishClient.
     # It is not desired to store password in RedfishClient
@@ -158,9 +161,7 @@ class BMC(BMCBase):
         if self.using_tpm_password:
             return self.get_login_password()
         else:
-            if self.using_nos_account:
-                return BMC.BMC_NOS_ACCOUNT_DEFAULT_PASSWORD
-            return BMC.BMC_ADMIN_ACCOUNT_DEFAULT_PASSWORD
+            return BMC.BMC_NOS_ACCOUNT_DEFAULT_PASSWORD
 
     @under_lock(lockfile=f'{BMC_DIR}/{BMC_TPM_HEX_FILE}.lock', timeout=5)
     def get_login_password(self):
@@ -250,7 +251,7 @@ class BMC(BMCBase):
         # We are not good with TPM based password here.
         # Try to login with default password.
         logger.log_notice(f'Try to login with BMC default password')
-        # Indicate password callback function to switch to BMC_ADMIN_ACCOUNT_DEFAULT_PASSWORD temporarily
+        # Indicate password callback function to switch to default password temporarily
         self.using_tpm_password = False
         ret = self.rf_client.login()
 
@@ -278,16 +279,25 @@ class BMC(BMCBase):
             logger.log_error(f'Fail to get login password from TPM: {str(e)}')
             return False
 
-        logger.log_notice(f'Try to apply TPM based password to BMC')
+        # Apply TPM password to NOS account.
+        logger.log_notice(f'Try to apply TPM based password to BMC NOS account')
         ret, msg = self.change_login_password(password)
         if ret != RedfishClient.ERR_CODE_OK:
             self.rf_client.invalidate_login_token()
-            logger.log_error(f'Fail to apply TPM based password to BMC')
+            logger.log_error(f'Fail to apply TPM based password to BMC NOS account')
             return False
+        else:
+            logger.log_notice(f'TPM password is successfully applied to BMC NOS account')
 
-        logger.log_notice(f'BMC password is restored successfully')
+        # Apply TPM password to legacy admin account.
+        # These part of code will be removed once BMC removes the admin account.
+        logger.log_notice(f'Try to apply TPM based password to BMC admin account')
+        ret, msg = self.change_login_password(password, 'admin')
+        if ret != RedfishClient.ERR_CODE_OK:
+            logger.log_error(f'Fail to apply TPM based password to BMC admin account')
+        else:
+            logger.log_notice(f'TPM password is successfully applied to BMC admin account')
 
-        # TPM based password has been restored.
         return True
 
     def get_login_token(self):
@@ -362,10 +372,8 @@ class BMC(BMCBase):
         comp_list = list(filter(lambda comp: comp.type_name == type_name, self.get_component_list()))
         return comp_list
 
-    def try_login(self):
-        account = 'NOS' if self.using_nos_account else 'admin'
-        logger.log_notice(f'Try login to BMC using the {account} account')
-
+    def login(self):
+        logger.log_notice(f'Try login to BMC using the NOS account')
         if self.rf_client is None:
             return RedfishClient.ERR_CODE_AUTH_FAILURE
 
@@ -381,14 +389,6 @@ class BMC(BMCBase):
 
         return ret
 
-    def login(self):
-        self.using_nos_account = True
-        ret = self.try_login()
-        if ret != RedfishClient.ERR_CODE_OK:
-            self.using_nos_account = False
-            ret = self.try_login()
-        return ret
-
     def logout(self):
         if self.rf_client and self.rf_client.has_login():
             return self.rf_client.logout()
@@ -400,36 +400,42 @@ class BMC(BMCBase):
             return (RedfishClient.ERR_CODE_AUTH_FAILURE, "")
 
         return self.rf_client.redfish_api_change_login_password(password, user)
+    
+    def enable_log(self, enable=True):
+        self.rf_client.enable_log(enable)
 
     # TODO(BMC): Check if should call it in files/scripts/load_system_info
-    def check_and_reset_tpm_password_for_user(self, user: str = BMC_ADMIN_ACCOUNT) -> bool:
-        '''
-        Check if the provided user has tpm password and if not,
-        generate a new tpm password and apply it to the user.
+    # check_and_reset_tpm_password_for_user(self, user: str = BMC_ADMIN_ACCOUNT) -> bool
+    # bmc.change_login_password(bmc.get_login_password(), 'admin')
 
-        Returns True if the TPM password is restored for the user or
-                user was already with TPM password, False otherwise.
-        '''
-        self.using_nos_account = True if user == self.BMC_NOS_ACCOUNT else False
+    # TODO(BMC): Implement APIs
+    '''
+    get_name()
 
-        if self.rf_client is None:
-            return False
+    get_presence()
 
-        # By default, BMC password callback will use TPM password
-        (ret, response) = self.rf_client.probe_login_error()
-        if ret == RedfishClient.ERR_CODE_AUTH_FAILURE:
-            logger.log_notice(f'User {user} does not have TPM password, restore it')
-            if self._restore_tpm_credential():
-                logger.log_notice(f'TPM password restored for user {user}')
-                return True
-            else:
-                logger.log_error(f'Fail to restore TPM password for user {user}')
-                return False
-        elif ret != RedfishClient.ERR_CODE_OK:
-            logger.log_error(f'Fail to check TPM password for user {user}: {response}')
-            return False
+    get_model()
 
-        return True
+    get_serial()
+
+    get_revision()
+
+    get_status()
+
+    is_replaceable()
+
+
+    get_eeprom()
+
+    get_version()
+
+    # TODO(BMC): check if params are needed or use the root
+    reset_password()
+
+    collect_dump()
+
+    update_firmware(fw_image)
+    '''
 
     @with_credential_restore
     def get_firmware_list(self):
@@ -448,34 +454,77 @@ class BMC(BMCBase):
         return self.rf_client.redfish_api_get_eeprom_list()
 
     @with_credential_restore
-    def update_firmware(self, fw_image, timeout = 1800, progress_callback = None):
-        logger.log_notice(f'Installing firmware image {fw_image} via BMC')
-        ret, msg = self.rf_client.redfish_api_update_firmware(fw_image, timeout, progress_callback)
-        logger.log_notice(f'Firmware update result: {ret}')
-        if ret:
-            logger.log_notice(f'{msg}')
-
-        return (ret, msg)
+    def request_power_cycle(self, immediate):
+        return self.rf_client.redfish_api_request_system_reset(
+            sytem_reset_type=RedfishClient.SYSTEM_RESET_TYPE_POWER_CYCLE, immediate=immediate)
 
     @with_credential_restore
-    def update_firmware_on_component(self, fw_image, fw_ids, timeout = 1800, progress_callback = None):
-        # Set component ID to be updated
-        logger.log_notice(f'Set BMC update targets: {fw_ids}')
-        ret, msg = self.rf_client.redfish_api_set_component_update(fw_ids)
-        if ret != RedfishClient.ERR_CODE_OK:
-            return (ret, 'Fail to set Component ID attribute')
+    def request_power_cycle_bypass(self):
+        ret, err_msg = self.rf_client.redfish_api_request_system_reset(
+            sytem_reset_type=RedfishClient.SYSTEM_RESET_TYPE_POWER_CYCLE_BYPASS, immediate=False)
 
-        logger.log_notice(f'Installing firmware image {fw_image} via BMC')
-        ret, msg = self.rf_client.redfish_api_update_firmware(fw_image, timeout, progress_callback)
+        # If power cycle bypass is not supported, try power cycle
+        if ret == RedfishClient.ERR_CODE_UNSUPPORTED_PARAMETER:
+            ret, err_msg = self.rf_client.redfish_api_request_system_reset(
+                sytem_reset_type=RedfishClient.SYSTEM_RESET_TYPE_POWER_CYCLE, immediate=False)
+
+        return (ret, err_msg)
+
+    @with_credential_restore
+    def request_cpu_reset(self):
+        return self.rf_client.redfish_api_request_system_reset(
+            sytem_reset_type=RedfishClient.SYSTEM_RESET_TYPE_CPU_RESET, immediate=True)
+
+    @with_credential_restore
+    def update_firmware(self, fw_image, fw_ids=None, force_update=False, progress_callback=None, timeout=1800):
+        # First try to update without force
+        logger.log_notice(f'Installing firmware image {fw_image} via BMC, force_update: {force_update}')
+        result = self.rf_client.redfish_api_update_firmware(fw_image,
+                                                            fw_ids,
+                                                            force_update,
+                                                            timeout,
+                                                            progress_callback)
+        ret, msg, updated_components, skipped_components = result
+
         logger.log_notice(f'Firmware update result: {ret}')
-        if ret:
+        if msg:
             logger.log_notice(f'{msg}')
 
-        # Reset component ID from to be updated
-        logger.log_notice(f'Clear BMC update targets')
-        _, _ = self.rf_client.redfish_api_set_component_update(None)
+        # TODO(BMC): Check if we need to force update also when force_update is False
+        # Downgrade detected, try to do force update
+        if (not force_update) and (ret == RedfishClient.ERR_CODE_LOWER_VERSION):
+            # Exclude the components that have already been updated or skipped
+            if fw_ids:
+                fw_ids = [comp for comp in fw_ids if comp not in updated_components]
+                fw_ids = [comp for comp in fw_ids if comp not in skipped_components]
 
-        return (ret, msg)
+            prev_updated_components = updated_components
+            prev_msg = msg
+
+            logger.log_notice(f'Firmware image timestamp is lower than the current timestamp')
+            logger.log_notice(f'Attempting to force update')
+            result = self.rf_client.redfish_api_update_firmware(fw_image,
+                                                                fw_ids,
+                                                                True,
+                                                                timeout,
+                                                                progress_callback)
+            ret, msg, updated_components, skipped_components = result
+
+            logger.log_notice(f'Firmware update result: {ret}')
+            if msg:
+                logger.log_notice(f'{msg}')
+
+            msg = prev_msg + msg
+            updated_components = prev_updated_components + updated_components
+
+        # Replace BMC internal firmware id with component display name in the message
+        for comp in self.get_component_list():
+            msg = msg.replace(comp.get_firmware_id(), comp.get_name())
+
+        # Set updated flag to True if there are components updated
+        updated = (len(updated_components) > 0)
+
+        return (ret, (msg, updated))
 
     @with_credential_restore
     def trigger_bmc_debug_log_dump(self):
@@ -484,6 +533,16 @@ class BMC(BMCBase):
     @with_credential_restore
     def get_bmc_debug_log_dump(self, task_id, filename, path):
         return self.rf_client.redfish_api_get_bmc_debug_log_dump(task_id, filename, path)
+    
+    def wait_until_reachable(self, timeout):
+        start_time = time.time()
+
+        while time.time() - start_time < timeout:
+            if ping(self.addr):
+                return True
+            time.sleep(1)
+
+        return False
     
     # TODO(BMC): Verify which functions are needed for BMC
 
