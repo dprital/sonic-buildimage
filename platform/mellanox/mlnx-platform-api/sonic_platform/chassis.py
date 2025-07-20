@@ -1115,6 +1115,7 @@ class Chassis(ChassisBase):
         self._bmc_initialized = True
 
     def _initialize_bmc(self):
+        # TODO(BMC): Why initialize_components?
         self.initialize_components()
         self.initialize_bmc()
 
