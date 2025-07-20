@@ -387,6 +387,7 @@ tcpdump==4.99.3-1
 tcptraceroute==1.5beta7+debian-4.1+b1
 tpm-udev==0.6
 tpm2-tools==5.4-1
+tqdm==4.67.1
 traceroute==1:2.1.2-1
 u-boot-tools==2023.01+dfsg-2+deb12u1
 ucf==3.0043+nmu1+deb12u1
