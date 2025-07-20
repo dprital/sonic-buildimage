@@ -2036,6 +2036,7 @@ tk8.6==8.6.13-2
 tk8.6-blt2.5==2.5.3+dfsg-4.1
 tpm-udev==0.6
 tpm2-tools==5.4-1
+tqdm==4.67.1
 ucf==3.0043+nmu1+deb12u1
 udev==252.38-1~deb12u1
 unicode-data==15.0.0-1

@@ -325,12 +325,15 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    chassis = sonic_platform.platform.Platform().get_chassis()
-    bmc = chassis.get_bmc()
-
-    if bmc is None:
-        print('X No BMC exists')
-        sys.exit(0)
+    try:
+        chassis = sonic_platform.platform.Platform().get_chassis()
+        bmc = chassis.get_bmc()
+        if bmc is None:
+            print('X No BMC exists')
+            sys.exit(0)
+    except Exception as e:
+        print('X BMC object is not ready')
+        sys.exit(1)
 
     bmc_ip = bmc.get_ip_addr()
     print(f"BMC IP address: {bmc_ip}")
@@ -373,4 +376,8 @@ if __name__ == '__main__':
     if args.force_update:
         kwargs['force_update'] = args.force_update
 
-    run_api_test(bmc, args.test, **kwargs) 
+    run_api_test(bmc, args.test, **kwargs)
+    try:
+        bmc.logout()
+    except Exception as e:
+        print(f"X Exception during BMC logout: {e}")
