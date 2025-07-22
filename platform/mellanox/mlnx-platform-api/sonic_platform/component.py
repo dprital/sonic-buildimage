@@ -910,18 +910,22 @@ class ComponentCPLDSN2201(ComponentCPLD):
         return True
 
 
-# TODO(BMC): Verify which classes and functions are needed for BMC components
-# And check the usage on them in load_system_info and platform_components.json
+# TODO(BMC): Verify which classes, functions and params are needed for BMC components
+# And check the bmc components usage in load_system_info and platform_components.json
 
 # class ComponentBMCObj(Component)
 
 # class ComponentBMC(ComponentBMCObj)
 
-# class ComponentFPGAOnBMC(ComponentBMCObj)
-
-# class ComponentERoTOnBMC(ComponentBMCObj)
-
-# class ComponentBIOSOnBMC(ComponentBMCObj)
+'''
+# attrs will come from platform_components.json
+"BMC": {
+            "managed_by": "BMC",
+            "id": "MGX_FW_BMC_0",
+            "eeprom_id": "BMC_eeprom",
+            "class": "ComponentBMC"
+        }
+'''
 
 
 class ComponentCPLDSN4280(ComponentCPLD):

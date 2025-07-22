@@ -34,7 +34,9 @@ try:
     from sonic_py_common.logger import Logger
     from .redfish_client import RedfishClient
     from . import utils
+    # TODO(BMC): Verify if functools is needed
     import functools
+    # TODO(BMC): Verify if filelock is needed
     import filelock
     import time
 except ImportError as e:
@@ -57,6 +59,7 @@ def ping(host):
         return False
 
 
+# TODO(BMC): Verify if this decorator is needed
 def under_lock(lockfile, timeout=2):
     """ Execute operations under lock. """
 
@@ -102,8 +105,10 @@ def with_credential_restore(api_func):
                 logger.log_notice(f'BMC TPM based password recovered. Retry {api_func.__name__}()')
                 ret, data = api_func(self, *args, **kwargs)
             else:
+                # TODO(BMC): Check if need to self.logout() for keep a single session
                 logger.log_notice(f'Fail to recover BMC based password')
                 return (RedfishClient.ERR_CODE_AUTH_FAILURE, data)
+        # TODO(BMC): Check if need to self.logout() for keep a single session
         return (ret, data)
     return wrapper
 
@@ -120,7 +125,7 @@ class BMC(BMCBase):
     BMC_NOS_ACCOUNT_DEFAULT_PASSWORD = "ABYX12#14artb51"
     BMC_DIR = "/host/bmc"
     MAX_LOGIN_ERROR_PROBE_CNT = 5
-    # TODO(BMC): change nvos to sonic
+    # TODO(BMC): Change nvos to sonic or remove it
     BMC_TPM_HEX_FILE = "nvos_const.bin"
 
     _instance = None
@@ -163,6 +168,78 @@ class BMC(BMCBase):
         else:
             return BMC.BMC_NOS_ACCOUNT_DEFAULT_PASSWORD
 
+    '''
+    # @under_lock(lockfile=f'{BMC_DIR}/{BMC_TPM_HEX_FILE}.lock', timeout=5)
+    def get_login_password(self):
+        try:
+            pass_len = 13
+            attempt = 1
+            max_attempts = 100
+            max_repeat = int(3 + 0.09 * pass_len)
+            while attempt <= max_attempts:
+                const = f"1300SONIC-BMC-USER-Const-{attempt}"
+                logger.log_debug(f"Password attempt {attempt} using const: {const}")
+                tpm_command = f'echo -n "{const}" | tpm2_createprimary -C o -G aes -u -'
+                result = subprocess.run(tpm_command, shell=True, capture_output=True, check=True, text=True)
+
+                symcipher_pattern = r"symcipher:\s+([\da-fA-F]+)"
+                symcipher_match = re.search(symcipher_pattern, result.stdout)
+
+                if not symcipher_match:
+                    raise Exception("Symmetric cipher not found in TPM output")
+
+                # BMC dictates a password of 13 characters. Random from TPM is used with an append of A!
+                symcipher_part = symcipher_match.group(1)[:pass_len-2]
+                if symcipher_part.isdigit():
+                    symcipher_value = symcipher_part[:pass_len-3] + 'vA!'
+                elif symcipher_part.isalpha() and symcipher_part.islower():
+                    symcipher_value = symcipher_part[:pass_len-3] + '9A!'
+                else:
+                    symcipher_value = symcipher_part + 'A!'
+                if len (symcipher_value) != pass_len:
+                    raise Exception("Bad cipher length from TPM output")
+                
+                # check for monotonic
+                monotonic_check = True
+                for i in range(len(symcipher_value) - 3): 
+                    seq = symcipher_value[i:i+4] 
+                    increments = [ord(seq[j+1]) - ord(seq[j]) for j in range(3)]
+                    if increments == [1, 1, 1] or increments == [-1, -1, -1]:
+                        monotonic_check = False
+                        break
+
+                variety_check = len(set(symcipher_value)) >= 5
+                repeating_pattern_check = sum(1 for i in range(pass_len - 1) if symcipher_value[i] == symcipher_value[i + 1]) <= max_repeat
+
+                # check for consecutive_pairs
+                count = 0
+                for i in range(11):
+                    val1 = symcipher_value[i]
+                    val2 = symcipher_value[i + 1]
+                    if val2 == "v" or val1 == "v":
+                        continue
+                    if abs(int(val2, 16) - int(val1, 16)) == 1:
+                        count += 1
+                consecutive_pair_check = count <= 4
+
+                if consecutive_pair_check and variety_check and repeating_pattern_check and monotonic_check:
+                    # os.remove(f"{self.BMC_DIR}/{self.BMC_TPM_HEX_FILE}")
+                    return symcipher_value
+                else:
+                    attempt += 1
+
+            raise Exception("Failed to generate a valid password after maximum retries.")
+
+        except subprocess.CalledProcessError as e:
+            logger.log_error(f"Error executing TPM command: {e}")
+            raise Exception("Failed to communicate with TPM")
+
+        except Exception as e:
+            logger.log_error(f"Error: {e}")
+            raise
+    '''
+
+    # TODO(BMC): update this function for SONiC
     @under_lock(lockfile=f'{BMC_DIR}/{BMC_TPM_HEX_FILE}.lock', timeout=5)
     def get_login_password(self):
         try:
@@ -289,23 +366,9 @@ class BMC(BMCBase):
         else:
             logger.log_notice(f'TPM password is successfully applied to BMC NOS account')
 
-        # Apply TPM password to legacy admin account.
-        # These part of code will be removed once BMC removes the admin account.
-        logger.log_notice(f'Try to apply TPM based password to BMC admin account')
-        ret, msg = self.change_login_password(password, 'admin')
-        if ret != RedfishClient.ERR_CODE_OK:
-            logger.log_error(f'Fail to apply TPM based password to BMC admin account')
-        else:
-            logger.log_notice(f'TPM password is successfully applied to BMC admin account')
-
         return True
 
-    def get_login_token(self):
-        if self.rf_client is None:
-            return None
-
-        return self.rf_client.get_login_token()
-
+    # TODO(BMC): Check if this function is needed and if it implements the correct logic
     def get_component_list(self):
 
         # TBD: As the future improvement, the logic of loading all components
@@ -395,6 +458,7 @@ class BMC(BMCBase):
         else:
             return RedfishClient.ERR_CODE_OK
 
+    # TODO(BMC): Check if @with_credential_restore is needed
     def change_login_password(self, password, user=None):
         if self.rf_client is None:
             return (RedfishClient.ERR_CODE_AUTH_FAILURE, "")
@@ -404,11 +468,7 @@ class BMC(BMCBase):
     def enable_log(self, enable=True):
         self.rf_client.enable_log(enable)
 
-    # TODO(BMC): Check if should call it in files/scripts/load_system_info
-    # check_and_reset_tpm_password_for_user(self, user: str = BMC_ADMIN_ACCOUNT) -> bool
-    # bmc.change_login_password(bmc.get_login_password(), 'admin')
-
-    # TODO(BMC): Implement APIs
+    # TODO(BMC): Implement the device_base APIs (check on component.py)
     '''
     get_name()
 
@@ -423,19 +483,9 @@ class BMC(BMCBase):
     get_status()
 
     is_replaceable()
-
-
-    get_eeprom()
-
-    get_version()
-
-    # TODO(BMC): check if params are needed or use the root
-    reset_password()
-
-    collect_dump()
-
-    update_firmware(fw_image)
     '''
+
+    # TODO(BMC): Implement the bmc_base APIs
 
     @with_credential_restore
     def get_firmware_list(self):
@@ -543,21 +593,3 @@ class BMC(BMCBase):
             time.sleep(1)
 
         return False
-    
-    # TODO(BMC): Verify which functions are needed for BMC
-
-    # @with_credential_restore
-    # def get_erot_copy_background_status(self, erot_component_id):
-    #     return self.rf_client.redfish_api_get_erot_copy_background_status(erot_component_id)
-
-    # @with_credential_restore
-    # def get_erots_debug_token_status(self):
-    #     return self.rf_client.redfish_api_get_debug_token_status()
-
-    # @with_credential_restore
-    # def get_erot_active_and_inactive_flashes(self, erot_id):
-    #     return self.rf_client.redfish_api_get_erot_active_and_inactive_flashes(erot_id)
-
-    # @with_credential_restore
-    # def get_erot_ap_boot_status(self, erot_id):
-    #     return self.rf_client.redfish_api_get_erot_ap_boot_status(erot_id)

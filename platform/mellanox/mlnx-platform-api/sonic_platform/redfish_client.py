@@ -30,8 +30,6 @@ import time
 import re
 import shlex
 from datetime import datetime
-# TODO(BMC): Verify if pydash is needed according to the commented functions below
-# import pydash as py_
 
 
 '''
@@ -233,9 +231,6 @@ class RedfishClient:
     def enable_log(self, enable = True):
         self.__log_enable = enable
 
-    def get_login_token(self):
-        return self.__token
-
     def curl_errors_to_redfish_erros_translation(self, curl_error):
         return self.CURL_TO_REDFISH_ERROR_MAP.get(
                     curl_error, RedfishClient.ERR_CODE_CURL_FAILURE)
@@ -342,19 +337,6 @@ class RedfishClient:
               f'{RedfishClient.REDFISH_URI_ACCOUNTS}/{user} ' \
               f'-d \'{{"Password" : "{new_password}"}}\''
         return cmd
-
-    # TODO(BMC): Verify if this function is needed according to the commented functions below
-    # '''
-    # Build the POST command to start debug toke request
-    # '''
-    # def __build_debug_token_cmd(self, debug_token_status=False):
-    #     data_type = "DebugTokenStatus" if debug_token_status else "GetDebugTokenRequest"
-    #     cmd = f'{self.__curl_path} -k -H "X-Auth-Token: {self.__token}" ' \
-    #           f'-H "Content-Type: application/json" ' \
-    #           f'-X POST https://{self.__svr_ip}' \
-    #           f'{RedfishClient.REDFISH_DEBUG_TOKEN}/LogService.CollectDiagnosticData ' \
-    #           f'-d \'{{"DiagnosticDataType":"OEM", "OEMDiagnosticDataType":"{data_type}"}}\''
-    #     return cmd
 
     '''
     Build the POST command to start BMC debug dump request Redfish Task
@@ -1084,12 +1066,6 @@ class RedfishClient:
             return (ret, error_msg)
 
         return (RedfishClient.ERR_CODE_OK, uri)
-
-    # TODO(BMC): Verify which functions are needed for BMC
-    # redfish_api_get_erot_copy_background_status
-    # redfish_api_get_debug_token_status
-    # redfish_api_get_erot_active_and_inactive_flashes
-    # redfish_api_get_erot_ap_boot_status
 
     '''
 
