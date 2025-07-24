@@ -25,19 +25,15 @@
 
 try:
     from functools import wraps
+    import base64
     import os
     import re
     import subprocess
-    import json
     from sonic_platform_base.bmc_base import BMCBase
     from sonic_py_common import device_info
     from sonic_py_common.logger import Logger
     from .redfish_client import RedfishClient
     from . import utils
-    # TODO(BMC): Verify if functools is needed
-    import functools
-    # TODO(BMC): Verify if filelock is needed
-    import filelock
     import time
 except ImportError as e:
     raise ImportError (str(e) + "- required module not found")
@@ -57,21 +53,6 @@ def ping(host):
         return True
     except subprocess.CalledProcessError:
         return False
-
-
-# TODO(BMC): Verify if this decorator is needed
-def under_lock(lockfile, timeout=2):
-    """ Execute operations under lock. """
-
-    def _under_lock(func):
-        @functools.wraps(func)
-        def wrapped_function(*args, **kwargs):
-            with filelock.FileLock(lockfile, timeout):
-                return func(*args, **kwargs)
-
-        return wrapped_function
-    return _under_lock
-
 
 def with_credential_restore(api_func):
     @wraps(api_func)
@@ -105,10 +86,11 @@ def with_credential_restore(api_func):
                 logger.log_notice(f'BMC TPM based password recovered. Retry {api_func.__name__}()')
                 ret, data = api_func(self, *args, **kwargs)
             else:
-                # TODO(BMC): Check if need to self.logout() for keep a single session
+                # TODO(BMC): Check if logout (parallel cases \ common session)
+                self.logout()
                 logger.log_notice(f'Fail to recover BMC based password')
                 return (RedfishClient.ERR_CODE_AUTH_FAILURE, data)
-        # TODO(BMC): Check if need to self.logout() for keep a single session
+        self.logout()
         return (ret, data)
     return wrapper
 
@@ -123,10 +105,10 @@ class BMC(BMCBase):
     CURL_PATH = '/usr/bin/curl'
     BMC_NOS_ACCOUNT = 'yormnAnb'
     BMC_NOS_ACCOUNT_DEFAULT_PASSWORD = "ABYX12#14artb51"
+    ROOT_ACCOUNT = 'root'
+    ROOT_ACCOUNT_DEFAULT_PASSWORD = '0penBmcTempPass!'
     BMC_DIR = "/host/bmc"
     MAX_LOGIN_ERROR_PROBE_CNT = 5
-    # TODO(BMC): Change nvos to sonic or remove it
-    BMC_TPM_HEX_FILE = "nvos_const.bin"
 
     _instance = None
 
@@ -168,150 +150,19 @@ class BMC(BMCBase):
         else:
             return BMC.BMC_NOS_ACCOUNT_DEFAULT_PASSWORD
 
-    '''
-    # @under_lock(lockfile=f'{BMC_DIR}/{BMC_TPM_HEX_FILE}.lock', timeout=5)
     def get_login_password(self):
         try:
-            pass_len = 13
-            attempt = 1
-            max_attempts = 100
-            max_repeat = int(3 + 0.09 * pass_len)
-            while attempt <= max_attempts:
-                const = f"1300SONIC-BMC-USER-Const-{attempt}"
-                logger.log_debug(f"Password attempt {attempt} using const: {const}")
-                tpm_command = f'echo -n "{const}" | tpm2_createprimary -C o -G aes -u -'
-                result = subprocess.run(tpm_command, shell=True, capture_output=True, check=True, text=True)
-
-                symcipher_pattern = r"symcipher:\s+([\da-fA-F]+)"
-                symcipher_match = re.search(symcipher_pattern, result.stdout)
-
-                if not symcipher_match:
-                    raise Exception("Symmetric cipher not found in TPM output")
-
-                # BMC dictates a password of 13 characters. Random from TPM is used with an append of A!
-                symcipher_part = symcipher_match.group(1)[:pass_len-2]
-                if symcipher_part.isdigit():
-                    symcipher_value = symcipher_part[:pass_len-3] + 'vA!'
-                elif symcipher_part.isalpha() and symcipher_part.islower():
-                    symcipher_value = symcipher_part[:pass_len-3] + '9A!'
-                else:
-                    symcipher_value = symcipher_part + 'A!'
-                if len (symcipher_value) != pass_len:
-                    raise Exception("Bad cipher length from TPM output")
-                
-                # check for monotonic
-                monotonic_check = True
-                for i in range(len(symcipher_value) - 3): 
-                    seq = symcipher_value[i:i+4] 
-                    increments = [ord(seq[j+1]) - ord(seq[j]) for j in range(3)]
-                    if increments == [1, 1, 1] or increments == [-1, -1, -1]:
-                        monotonic_check = False
-                        break
-
-                variety_check = len(set(symcipher_value)) >= 5
-                repeating_pattern_check = sum(1 for i in range(pass_len - 1) if symcipher_value[i] == symcipher_value[i + 1]) <= max_repeat
-
-                # check for consecutive_pairs
-                count = 0
-                for i in range(11):
-                    val1 = symcipher_value[i]
-                    val2 = symcipher_value[i + 1]
-                    if val2 == "v" or val1 == "v":
-                        continue
-                    if abs(int(val2, 16) - int(val1, 16)) == 1:
-                        count += 1
-                consecutive_pair_check = count <= 4
-
-                if consecutive_pair_check and variety_check and repeating_pattern_check and monotonic_check:
-                    # os.remove(f"{self.BMC_DIR}/{self.BMC_TPM_HEX_FILE}")
-                    return symcipher_value
-                else:
-                    attempt += 1
-
-            raise Exception("Failed to generate a valid password after maximum retries.")
-
-        except subprocess.CalledProcessError as e:
-            logger.log_error(f"Error executing TPM command: {e}")
-            raise Exception("Failed to communicate with TPM")
-
-        except Exception as e:
-            logger.log_error(f"Error: {e}")
-            raise
-    '''
-
-    # TODO(BMC): update this function for SONiC
-    @under_lock(lockfile=f'{BMC_DIR}/{BMC_TPM_HEX_FILE}.lock', timeout=5)
-    def get_login_password(self):
-        try:
-            pass_len = 13
-            attempt = 1
-            max_attempts = 100
-            max_repeat = int(3 + 0.09 * pass_len)
-            # TODO(BMC): change nvos to sonic
-            hex_data = "1300NVOS-BMC-USER-Const"
-            os.makedirs(self.BMC_DIR, exist_ok=True)
-            cmd = f'echo "{hex_data}" | xxd -r -p >  {self.BMC_DIR}/{self.BMC_TPM_HEX_FILE}'
-            subprocess.run(cmd, shell=True, check=True)
-
-            tpm_command = ["tpm2_createprimary", "-C", "o", "-u",  f"{self.BMC_DIR}/{self.BMC_TPM_HEX_FILE}", "-G", "aes256cfb"]
-            result = subprocess.run(tpm_command, capture_output=True, check=True, text=True)
-
-            while attempt <= max_attempts:
-                if attempt > 1:
-                    # TODO(BMC): change nvos to sonic
-                    const = f"1300NVOS-BMC-USER-Const-{attempt}"
-                    mess = f"Password did not meet criteria; retrying with const: {const}"
-                    logger.log_debug(mess)
-                    tpm_command = f'echo -n "{const}" | tpm2_createprimary -C o -G aes -u -'
-                    result = subprocess.run(tpm_command, shell=True, capture_output=True, check=True, text=True)
-
-                symcipher_pattern = r"symcipher:\s+([\da-fA-F]+)"
-                symcipher_match = re.search(symcipher_pattern, result.stdout)
-
-                if not symcipher_match:
-                    raise Exception("Symmetric cipher not found in TPM output")
-
-                # BMC dictates a password of 13 characters. Random from TPM is used with an append of A!
-                symcipher_part = symcipher_match.group(1)[:pass_len-2]
-                if symcipher_part.isdigit():
-                    symcipher_value = symcipher_part[:pass_len-3] + 'vA!'
-                elif symcipher_part.isalpha() and symcipher_part.islower():
-                    symcipher_value = symcipher_part[:pass_len-3] + '9A!'
-                else:
-                    symcipher_value = symcipher_part + 'A!'
-                if len (symcipher_value) != pass_len:
-                    raise Exception("Bad cipher length from TPM output")
-                
-                # check for monotonic
-                monotonic_check = True
-                for i in range(len(symcipher_value) - 3): 
-                    seq = symcipher_value[i:i+4] 
-                    increments = [ord(seq[j+1]) - ord(seq[j]) for j in range(3)]
-                    if increments == [1, 1, 1] or increments == [-1, -1, -1]:
-                        monotonic_check = False
-                        break
-
-                variety_check = len(set(symcipher_value)) >= 5
-                repeating_pattern_check = sum(1 for i in range(pass_len - 1) if symcipher_value[i] == symcipher_value[i + 1]) <= max_repeat
-
-                # check for consecutive_pairs
-                count = 0
-                for i in range(11):
-                    val1 = symcipher_value[i]
-                    val2 = symcipher_value[i + 1]
-                    if val2 == "v" or val1 == "v":
-                        continue
-                    if abs(int(val2, 16) - int(val1, 16)) == 1:
-                        count += 1
-                consecutive_pair_check = count <= 4
-
-                if consecutive_pair_check and variety_check and repeating_pattern_check and monotonic_check:
-                    os.remove(f"{self.BMC_DIR}/{self.BMC_TPM_HEX_FILE}")
-                    return symcipher_value
-                else:
-                    attempt += 1
-
-            raise Exception("Failed to generate a valid password after maximum retries.")
+            const = "1300SONIC-BMC-USER-Const"
+            tpm_command = f'echo -n "{const}" | tpm2_createprimary -C o -G aes -u -'
+            result = subprocess.run(tpm_command, shell=True,
+                                    capture_output=True, check=True,
+                                    text=True).stdout
+            match = re.search(r"symcipher:\s+([\da-fA-F]+)", result)
+            if not match:
+                raise Exception("Symmetric cipher not found in TPM output")
+            # Extract symcipher and encode to base64
+            # TODO(BMC): Check if need to take less than 20 chars (0-13)
+            return base64.b64encode(bytes.fromhex(match.group(1))).decode("ascii")
 
         except subprocess.CalledProcessError as e:
             logger.log_error(f"Error executing TPM command: {e}")
@@ -368,16 +219,32 @@ class BMC(BMCBase):
 
         return True
 
-    # TODO(BMC): Check if this function is needed and if it implements the correct logic
+    def get_eeprom_id(self):
+        return self.get_component_attr('BMC', 'eeprom_id')
+    
+    def get_id(self):
+        return self.get_component_attr('BMC', 'id')
+    
+    def get_component_attr(self, component_name, attr_name):
+        try:
+            platform_path = device_info.get_path_to_platform_dir()
+            platform_components_json_path = \
+                os.path.join(platform_path, 'platform_components.json')
+            comp_data = utils.load_json_file(platform_components_json_path)
+            if not comp_data or len(comp_data.get('chassis', {})) == 0:
+                return None
+            if 'component' not in comp_data['chassis']:
+                return None
+            components =  comp_data['chassis']['component']
+            attrs = components.get(component_name, {})
+            if attrs:
+                return attrs.get(attr_name, None)
+            return None
+        except Exception as e:
+            logger.log_error(f'Error getting component attribute {attr_name} for {component_name}: {str(e)}')
+            return None
+
     def get_component_list(self):
-
-        # TBD: As the future improvement, the logic of loading all components
-        #  (including non-BMC managed entities) can be implemented in a
-        # component manager from which BMC can retrieve relevant components.
-        # Each component is configured with its attributes and class in
-        # platform_components.json. Thus we can load the components in a
-        # generic manner.
-
         platform_path = device_info.get_path_to_platform_dir()
         platform_components_json_path = \
             os.path.join(platform_path, 'platform_components.json')
@@ -416,11 +283,6 @@ class BMC(BMCBase):
                 continue
             comp_list.append(comp)
 
-        # The reason why comp_list is not cached in BMC is the concern of circular
-        # reference with ComponentBMCObj. Anyway, future improvement will move
-        # component list management part to Chassis. Chassis holds component list
-        # references.
-
         return comp_list
 
     def get_component_by_name(self, name):
@@ -458,7 +320,7 @@ class BMC(BMCBase):
         else:
             return RedfishClient.ERR_CODE_OK
 
-    # TODO(BMC): Check if @with_credential_restore is needed
+    # There is no with_credential_restore for preventing infinite loop
     def change_login_password(self, password, user=None):
         if self.rf_client is None:
             return (RedfishClient.ERR_CODE_AUTH_FAILURE, "")
@@ -467,26 +329,61 @@ class BMC(BMCBase):
     
     def enable_log(self, enable=True):
         self.rf_client.enable_log(enable)
+    
+    def wait_until_reachable(self, timeout):
+        start_time = time.time()
+        while time.time() - start_time < timeout:
+            if ping(self.addr):
+                return True
+            time.sleep(1)
+        return False
+    
+    def _is_bmc_eeprom_content_valid(self, eeprom_info):
+        if None == eeprom_info or 0 == len(eeprom_info):
+            return False
+        got_error = eeprom_info.get('error')
+        if got_error:
+            logger.log_error(f'Got error when quering eeprom: {got_error}')
+            return False
 
-    # TODO(BMC): Implement the device_base APIs (check on component.py)
-    '''
-    get_name()
+    def get_name(self):
+        return 'BMC'
+    
+    def get_presence(self):
+        platform_path = device_info.get_path_to_platform_dir()
+        bmc_json_path = \
+            os.path.join(platform_path, 'bmc.json')
+        bmc_data = utils.load_json_file(bmc_json_path)
+        if bmc_data and bmc_data.get('bmc_addr'):
+            return True
+        return False
+    
+    def get_model(self):
+        eeprom_info = self.get_eeprom()
+        if False == self._is_bmc_eeprom_content_valid(eeprom_info):
+            return None
+        return eeprom_info.get('Model')
+    
+    def get_serial(self):
+        eeprom_info = self.get_eeprom()
+        if False == self._is_bmc_eeprom_content_valid(eeprom_info):
+            return None
+        return eeprom_info.get('SerialNumber')
 
-    get_presence()
-
-    get_model()
-
-    get_serial()
-
-    get_revision()
-
-    get_status()
-
-    is_replaceable()
-    '''
-
-    # TODO(BMC): Implement the bmc_base APIs
-
+    def get_revision(self):
+        return 'N/A'
+    
+    def get_status(self):
+        if not self.get_presence():
+            return False
+        # TODO(BMC): Check State and Health from get_eeprom
+        if not ping(self.addr):
+            return False
+        return True
+    
+    def is_replaceable(self):
+        return False
+    
     @with_credential_restore
     def get_firmware_list(self):
         return self.rf_client.redfish_api_get_firmware_list()
@@ -540,7 +437,6 @@ class BMC(BMCBase):
         if msg:
             logger.log_notice(f'{msg}')
 
-        # TODO(BMC): Check if we need to force update also when force_update is False
         # Downgrade detected, try to do force update
         if (not force_update) and (ret == RedfishClient.ERR_CODE_LOWER_VERSION):
             # Exclude the components that have already been updated or skipped
@@ -581,15 +477,44 @@ class BMC(BMCBase):
         return self.rf_client.redfish_api_trigger_bmc_debug_log_dump()
 
     @with_credential_restore
-    def get_bmc_debug_log_dump(self, task_id, filename, path):
-        return self.rf_client.redfish_api_get_bmc_debug_log_dump(task_id, filename, path)
+    def get_bmc_debug_log_dump(self, task_id, filename, path, timeout = 120):
+        return self.rf_client.redfish_api_get_bmc_debug_log_dump(task_id, filename, path, timeout)
     
-    def wait_until_reachable(self, timeout):
-        start_time = time.time()
+    def reset_password(self):
+        try:
+            self.login()
+            (ret, msg) = self.change_login_password(BMC.ROOT_ACCOUNT_DEFAULT_PASSWORD, BMC.ROOT_ACCOUNT)
+            self.logout()
+            return (ret, msg)
+        except Exception as e:
+            logger.log_error(f'Failed to reset BMC root password: {str(e)}')
+            return (RedfishClient.ERR_CODE_AUTH_FAILURE, str(e))
 
-        while time.time() - start_time < timeout:
-            if ping(self.addr):
-                return True
-            time.sleep(1)
-
-        return False
+    def get_eeprom(self):
+        try:
+            eeprom_id = self.get_eeprom_id()
+            if not eeprom_id:
+                logger.log_error('BMC EEPROM ID is not defined')
+                return {}
+            ret, eeprom_info = self.get_eeprom_info(eeprom_id)
+            if ret != RedfishClient.ERR_CODE_OK:
+                logger.log_error(f'Failed to get BMC EEPROM info: {ret}')
+            return eeprom_info
+        except Exception as e:
+            logger.log_error(f'Failed to get BMC EEPROM info: {str(e)}')
+            return {}
+    
+    def get_version(self):
+        ret = 0
+        version = 'N/A'
+        try:
+            fw_id = self.get_component_attr('BMC', 'id')
+            if not fw_id:
+                logger.log_error('BMC firmware ID is not defined')
+                return 'N/A'
+            ret, version =  self.get_firmware_version(fw_id)
+        except Exception as e:
+            logger.log_error(f'Failed to get BMC firmware version: {str(e)}')
+        if ret != RedfishClient.ERR_CODE_OK:
+            return 'N/A'
+        return version

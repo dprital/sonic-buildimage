@@ -29,6 +29,7 @@ try:
     import glob
     import tempfile
     import subprocess
+    import traceback
     from sonic_py_common import device_info
     from sonic_py_common.general import check_output_pipe
     if sys.version_info[0] > 2:
@@ -909,16 +910,9 @@ class ComponentCPLDSN2201(ComponentCPLD):
 
         return True
 
-
-# TODO(BMC): Verify which classes, functions and params are needed for BMC components
-# And check the bmc components usage in load_system_info and platform_components.json
-
-# class ComponentBMCObj(Component)
-
-# class ComponentBMC(ComponentBMCObj)
-
+# TODO(BMC): Update platform_components.json files
 '''
-# attrs will come from platform_components.json
+# attrs will come from platform_components.json and from get_component_list
 "BMC": {
             "managed_by": "BMC",
             "id": "MGX_FW_BMC_0",
@@ -926,7 +920,137 @@ class ComponentCPLDSN2201(ComponentCPLD):
             "class": "ComponentBMC"
         }
 '''
+class ComponentBMCObj(Component):
 
+    def __init__(self, name, attrs):
+        super(Component, self).__init__()
+
+        from .bmc import BMC
+
+        self.bmc = BMC.get_instance()
+        self.name = name
+        self.type_name = ''
+        self.fw_id = attrs.get('id', '')
+        self.eeprom_id = attrs.get('eeprom_id', None)
+
+    def get_firmware_id(self):
+        return self.fw_id
+
+    def get_eeprom_id(self):
+        return self.eeprom_id
+
+    def install_firmware(self, image_path, allow_reboot=True, force_update=False, progress_callback=None):
+        if not self._check_file_validity(image_path):
+            return (False, ('Invalid firmware image path', False))
+        print('Starting {} firmware update, path={}'.format(self.get_firmware_id(), image_path))
+
+        ret = 0
+        error_msg = ''
+        updated = False
+
+        try:
+            ret, (error_msg, updated) = self.bmc.update_firmware(image_path,
+                                                                 [],
+                                                                 force_update,
+                                                                 progress_callback)
+        except Exception as e:
+            error_trace = traceback.format_exc()
+            print(str(e))
+            print(error_trace)
+            raise
+
+        if (ret == 0):
+            # TODO(BMC): Add power cycle for apply the update
+            return (True, (error_msg, updated))
+        else:
+            print(f'Fail to upgrade {self.get_firmware_id()} firmware ({error_msg})')
+            return (False, (error_msg, updated))
+
+    def get_firmware_version(self):
+        ret = 0
+        version = 'N/A'
+        try:
+            ret, version =  self.bmc.get_firmware_version(self.get_firmware_id())
+        except Exception as e:
+            return 'N/A'
+        if (ret != 0):
+            return 'N/A'
+        return version
+
+    def get_eeprom_info(self):
+        eeprom_id = self.get_eeprom_id()
+        if eeprom_id is None:
+            print(" Can't read eeprom. Missing eeprom id.")
+            return {}
+        ret, eeprom_info = self.bmc.get_eeprom_info(eeprom_id)
+        if ret != 0:
+            print(f'Fail to get {eeprom_id} from BMC, error code: {ret}')
+        return eeprom_info
+
+    def _is_bmc_eeprom_content_valid(self, eeprom_info):
+        if None == eeprom_info or 0 == len(eeprom_info):
+            print(f'Got empty eeprom info: {eeprom_info}')
+            return False
+        got_error = eeprom_info.get('error')
+
+        if got_error:
+            print(f'Got error when quering eeprom: {got_error}')
+            return False
+        eeprom_error_code = eeprom_info.get('Error_code','ok')
+        eeprom_health = eeprom_info.get('Health','ok')
+
+        if eeprom_error_code.lower() != 'ok' or eeprom_health.lower() != 'ok':
+            print(f'Got eeprom info with bad statuses: {eeprom_info}')
+            return False
+        return True
+
+    def get_part_number(self):
+        if not self.get_eeprom_id():
+            print(f"Component {self.name} doesn't have eeprom id. Will not get part number")
+            return None
+
+        eeprom_info = self.get_eeprom_info()
+        if False == self._is_bmc_eeprom_content_valid(eeprom_info):
+            print(f"Can't get part number for BMC because eeprom is not valid")
+            return None
+        else:
+            return eeprom_info.get('PartNumber')
+
+    def get_model(self):
+        if not self.get_eeprom_id():
+            print(f"Component {self.name} doesn't have eeprom id. Will not get model")
+            return None
+
+        eeprom_info = self.get_eeprom_info()
+        if False == self._is_bmc_eeprom_content_valid(eeprom_info):
+            print(f"Can't get model for BMC because eeprom is not valid")
+            return None
+        else:
+            return eeprom_info.get('Model')
+
+    def get_serial_number(self):
+        if not self.get_eeprom_id():
+            print(f"Component {self.name} doesn't have eeprom id. Will not get serial number")
+            return None
+
+        eeprom_info = self.get_eeprom_info()
+        if False == self._is_bmc_eeprom_content_valid(eeprom_info):
+            print(f"Can't get serial number for BMC because eeprom is not valid")
+            return None
+        else:
+            return eeprom_info.get('SerialNumber')
+
+class ComponentBMC(ComponentBMCObj):
+    COMPONENT_NAME = 'BMC'
+    COMPONENT_DESCRIPTION = 'BMC - Baseboard Management Controller'
+    COMPONENT_FIRMWARE_EXTENSION = ['.fwpkg']
+
+    def __init__(self, name, attrs):
+        super(ComponentBMC, self).__init__(name, attrs)
+
+        self.type_name = self.COMPONENT_NAME
+        self.description = self.COMPONENT_DESCRIPTION
+        self.image_ext_name = self.COMPONENT_FIRMWARE_EXTENSION
 
 class ComponentCPLDSN4280(ComponentCPLD):
     CPLD_FIRMWARE_UPDATE_COMMAND = ['cpldupdate', '--gpio', '--print-progress', '']

@@ -358,9 +358,6 @@ class DeviceDataManager:
             return ComponentCPLDSN2201.get_component_list()
         if cls.get_platform_name() in ['x86_64-nvidia_sn4280-r0']:
             return ComponentCPLDSN4280.get_component_list() + ComponenetFPGADPU.get_component_list()
-        # TODO(BMC): Check if needed
-        # if cls.get_platform_name() in platform_with_bmc:
-        #     return ComponentCPLDN5110.get_component_list()
         return ComponentCPLD.get_component_list()
 
     @classmethod
