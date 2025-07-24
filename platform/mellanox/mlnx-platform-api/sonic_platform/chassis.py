@@ -813,8 +813,6 @@ class Chassis(ChassisBase):
         # Initialize BMC and its components
         self.initialize_bmc()
 
-        # TODO(BMC): verify if need to self.initialize_fw_dir()
-
     def get_num_components(self):
         """
         Retrieves the number of components available on this chassis
@@ -1107,7 +1105,6 @@ class Chassis(ChassisBase):
             self._bmc = BMC.get_instance()
 
             try:
-                # TODO(BMC): Check if this function is needed or we can just append/extend the BMC component
                 bmc_comp_list = self._bmc.get_component_list()
                 self._component_list.extend(bmc_comp_list)
             except Exception as e:
