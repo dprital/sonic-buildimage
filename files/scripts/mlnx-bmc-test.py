@@ -194,6 +194,97 @@ def test_reset_password(bmc):
         return False
 
 
+def test_get_bmc_name(bmc):
+    """Test get BMC name API"""
+    print("\n=== Testing Get BMC Name ===")
+    
+    try:
+        name = bmc.get_name()
+        print(f"V BMC name: {name}")
+        return True
+    except Exception as e:
+        print(f"X Failed to get BMC name: {e}")
+        return False
+
+
+def test_get_bmc_presence(bmc):
+    """Test get BMC presence API"""
+    print("\n=== Testing Get BMC Presence ===")
+    
+    try:
+        presence = bmc.get_presence()
+        print(f"V BMC presence: {presence}")
+        return True
+    except Exception as e:
+        print(f"X Failed to get BMC presence: {e}")
+        return False
+
+
+def test_get_bmc_model(bmc):
+    """Test get BMC model API"""
+    print("\n=== Testing Get BMC Model ===")
+    
+    try:
+        model = bmc.get_model()
+        print(f"V BMC model: {model}")
+        return True
+    except Exception as e:
+        print(f"X Failed to get BMC model: {e}")
+        return False
+
+
+def test_get_bmc_serial(bmc):
+    """Test get BMC serial API"""
+    print("\n=== Testing Get BMC Serial ===")
+    
+    try:
+        serial = bmc.get_serial()
+        print(f"V BMC serial: {serial}")
+        return True
+    except Exception as e:
+        print(f"X Failed to get BMC serial: {e}")
+        return False
+
+
+def test_get_bmc_revision(bmc):
+    """Test get BMC revision API"""
+    print("\n=== Testing Get BMC Revision ===")
+    
+    try:
+        revision = bmc.get_revision()
+        print(f"V BMC revision: {revision}")
+        return True
+    except Exception as e:
+        print(f"X Failed to get BMC revision: {e}")
+        return False
+
+
+def test_get_bmc_status(bmc):
+    """Test get BMC status API"""
+    print("\n=== Testing Get BMC Status ===")
+    
+    try:
+        status = bmc.get_status()
+        print(f"V BMC status: {status}")
+        return True
+    except Exception as e:
+        print(f"X Failed to get BMC status: {e}")
+        return False
+
+
+def test_is_bmc_replaceable(bmc):
+    """Test is BMC replaceable API"""
+    print("\n=== Testing Is BMC Replaceable ===")
+    
+    try:
+        replaceable = bmc.is_replaceable()
+        print(f"V BMC replaceable: {replaceable}")
+        return True
+    except Exception as e:
+        print(f"X Failed to check if BMC is replaceable: {e}")
+        return False
+
+
 def test_request_power_cycle(bmc, immediate=False):
     """Test BMC power cycle API"""
     print("\n=== Testing BMC Power Cycle ===")
@@ -286,6 +377,13 @@ def run_api_test(bmc, api_name, **kwargs):
     print(f"{'=' * 60}")
     
     api_tests = {
+        'get_name': test_get_bmc_name,
+        'get_presence': test_get_bmc_presence,
+        'get_model': test_get_bmc_model,
+        'get_serial': test_get_bmc_serial,
+        'get_revision': test_get_bmc_revision,
+        'get_status': test_get_bmc_status,
+        'is_replaceable': test_is_bmc_replaceable,
         'get_ip': test_get_bmc_ip_addr,
         'get_eeprom_list': test_get_bmc_eeprom_list,
         'get_eeprom_info': lambda bmc: test_get_bmc_eeprom_info(bmc, kwargs.get('eeprom_id')),
@@ -302,7 +400,7 @@ def run_api_test(bmc, api_name, **kwargs):
         return api_tests[api_name](bmc)
     else:
         print(f"X Unknown API test: {api_name}")
-        print("Available API tests: get_ip, get_eeprom_list, get_eeprom_info, get_firmware_list, get_firmware_version, trigger_dump, get_dump, reset_password, upgrade_firmware, power_cycle")
+        print("Available API tests: get_name, get_presence, get_model, get_serial, get_revision, get_status, is_replaceable, get_ip, get_eeprom_list, get_eeprom_info, get_firmware_list, get_firmware_version, trigger_dump, get_dump, reset_password, upgrade_firmware, power_cycle")
         return False
 
 
@@ -313,7 +411,7 @@ if __name__ == '__main__':
         sys.exit(-1)
 
     parser = argparse.ArgumentParser(description='BMC API Test Tool - Run one test at a time')
-    parser.add_argument("--test", choices=['get_ip', 'get_eeprom_list', 'get_eeprom_info', 'get_firmware_list', 'get_firmware_version', 'trigger_dump', 'get_dump', 'reset_password', 'upgrade_firmware', 'power_cycle'],
+    parser.add_argument("--test", choices=['get_name', 'get_presence', 'get_model', 'get_serial', 'get_revision', 'get_status', 'is_replaceable', 'get_ip', 'get_eeprom_list', 'get_eeprom_info', 'get_firmware_list', 'get_firmware_version', 'trigger_dump', 'get_dump', 'reset_password', 'upgrade_firmware', 'power_cycle'],
                         required=True, help="Test a specific BMC API")
     parser.add_argument("--task-id", help="Task ID for get_dump test")
     parser.add_argument("--fw-image", help="Firmware image file for upgrade_firmware test")
