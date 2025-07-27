@@ -1113,7 +1113,6 @@ class Chassis(ChassisBase):
         self._bmc_initialized = True
 
     def _initialize_bmc(self):
-        # TODO(BMC): check why hw-management/config/cpld_num created after 6m
         self.initialize_components()
         self.initialize_bmc()
 
