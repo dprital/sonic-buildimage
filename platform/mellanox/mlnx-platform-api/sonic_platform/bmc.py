@@ -86,7 +86,7 @@ def with_credential_restore(api_func):
                 logger.log_notice(f'BMC TPM based password recovered. Retry {api_func.__name__}()')
                 ret, data = api_func(self, *args, **kwargs)
             else:
-                # TODO(BMC): Check if logout (parallel cases \ common session)
+                # TODO(BMC): Check if logout works (parallel cases \ common session)
                 self.logout()
                 logger.log_notice(f'Fail to recover BMC based password')
                 return (RedfishClient.ERR_CODE_AUTH_FAILURE, data)
