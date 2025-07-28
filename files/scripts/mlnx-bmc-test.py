@@ -166,12 +166,39 @@ def test_get_bmc_debug_log_dump(bmc, task_id):
         return False
 
 
-def test_reset_password(bmc):
-    """Test reset password API"""
-    print("\n=== Testing Reset Password ===")
+def test_get_bmc_eeprom(bmc):
+    """Test get BMC EEPROM API"""
+    print("\n=== Testing Get BMC EEPROM ===")
     
     try:
-        print("Testing password reset for root user...")
+        eeprom_info = bmc.get_eeprom()
+        print(f"V BMC EEPROM retrieved successfully")
+        print(f"EEPROM info: {eeprom_info}")
+        return True
+    except Exception as e:
+        print(f"X Failed to get BMC EEPROM: {e}")
+        return False
+
+
+def test_get_bmc_version(bmc):
+    """Test get BMC version API"""
+    print("\n=== Testing Get BMC Version ===")
+    
+    try:
+        version = bmc.get_version()
+        print(f"V BMC version: {version}")
+        return True
+    except Exception as e:
+        print(f"X Failed to get BMC version: {e}")
+        return False
+
+
+def test_change_password(bmc):
+    """Test change password API"""
+    print("\n=== Testing Change Password ===")
+    
+    try:
+        print("Testing password change for root user...")
         ret = bmc.login()
         if ret != 0:
             print("Failed to login to BMC")
@@ -184,9 +211,30 @@ def test_reset_password(bmc):
         print(f"Message: {msg}")
         
         if ret == 0:
-            print("V Root password reset successful")
+            print("V Root password change successful")
         else:
-            print("X Root password reset failed")
+            print("X Root password change failed")
+        
+        return ret == 0
+    except Exception as e:
+        print(f"X Exception during password change: {e}")
+        return False
+
+
+def test_reset_password(bmc):
+    """Test reset password API"""
+    print("\n=== Testing Reset Password ===")
+    
+    try:
+        print("Testing password reset...")
+        ret, msg = bmc.reset_password()
+        print(f"Reset password result: {ret}")
+        print(f"Message: {msg}")
+        
+        if ret == 0:
+            print("V BMC password reset successful")
+        else:
+            print("X BMC password reset failed")
         
         return ret == 0
     except Exception as e:
@@ -384,6 +432,8 @@ def run_api_test(bmc, api_name, **kwargs):
         'get_revision': test_get_bmc_revision,
         'get_status': test_get_bmc_status,
         'is_replaceable': test_is_bmc_replaceable,
+        'get_eeprom': test_get_bmc_eeprom,
+        'get_version': test_get_bmc_version,
         'get_ip': test_get_bmc_ip_addr,
         'get_eeprom_list': test_get_bmc_eeprom_list,
         'get_eeprom_info': lambda bmc: test_get_bmc_eeprom_info(bmc, kwargs.get('eeprom_id')),
@@ -391,6 +441,7 @@ def run_api_test(bmc, api_name, **kwargs):
         'get_firmware_version': lambda bmc: test_get_bmc_firmware_version(bmc, kwargs.get('fw_id')),
         'trigger_dump': test_trigger_bmc_debug_log_dump,
         'get_dump': lambda bmc: test_get_bmc_debug_log_dump(bmc, kwargs.get('task_id')),
+        'change_password': test_change_password,
         'reset_password': test_reset_password,
         'upgrade_firmware': lambda bmc: test_upgrade_bmc_firmware(bmc, kwargs.get('fw_image'), kwargs.get('target'), kwargs.get('force_update', False)),
         'power_cycle': lambda bmc: test_request_power_cycle(bmc, kwargs.get('immediate', False)),
@@ -400,7 +451,6 @@ def run_api_test(bmc, api_name, **kwargs):
         return api_tests[api_name](bmc)
     else:
         print(f"X Unknown API test: {api_name}")
-        print("Available API tests: get_name, get_presence, get_model, get_serial, get_revision, get_status, is_replaceable, get_ip, get_eeprom_list, get_eeprom_info, get_firmware_list, get_firmware_version, trigger_dump, get_dump, reset_password, upgrade_firmware, power_cycle")
         return False
 
 
@@ -411,7 +461,10 @@ if __name__ == '__main__':
         sys.exit(-1)
 
     parser = argparse.ArgumentParser(description='BMC API Test Tool - Run one test at a time')
-    parser.add_argument("--test", choices=['get_name', 'get_presence', 'get_model', 'get_serial', 'get_revision', 'get_status', 'is_replaceable', 'get_ip', 'get_eeprom_list', 'get_eeprom_info', 'get_firmware_list', 'get_firmware_version', 'trigger_dump', 'get_dump', 'reset_password', 'upgrade_firmware', 'power_cycle'],
+    parser.add_argument("--test", choices=['get_name', 'get_presence', 'get_model', 'get_serial', 'get_revision', 'get_status',
+                                           'is_replaceable', 'get_eeprom', 'get_version', 'get_ip', 'get_eeprom_list',
+                                           'get_eeprom_info', 'get_firmware_list', 'get_firmware_version', 'trigger_dump',
+                                           'get_dump', 'change_password', 'reset_password', 'upgrade_firmware', 'power_cycle'],
                         required=True, help="Test a specific BMC API")
     parser.add_argument("--task-id", help="Task ID for get_dump test")
     parser.add_argument("--fw-image", help="Firmware image file for upgrade_firmware test")
