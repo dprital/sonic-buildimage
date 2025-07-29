@@ -35,6 +35,9 @@ try:
     from .redfish_client import RedfishClient
     from . import utils
     import time
+    # TODO(BMC): functools,filelock should be removed after HW MGM and BMC will be aligned
+    import functools
+    import filelock
 except ImportError as e:
     raise ImportError (str(e) + "- required module not found")
 
@@ -47,12 +50,26 @@ def ping(host):
     # -c 1: Send only one packet
     # -W 1: Wait 1 second for a response
     command = ['/usr/bin/ping', '-c', '1', '-W', '1', host]
-
     try:
         subprocess.check_output(command, stderr=subprocess.STDOUT)
         return True
     except subprocess.CalledProcessError:
         return False
+
+
+# TODO(BMC): Should be removed after HW MGM and BMC will be aligned
+def under_lock(lockfile, timeout=2):
+    """ Execute operations under lock. """
+
+    def _under_lock(func):
+        @functools.wraps(func)
+        def wrapped_function(*args, **kwargs):
+            with filelock.FileLock(lockfile, timeout):
+                return func(*args, **kwargs)
+
+        return wrapped_function
+    return _under_lock
+
 
 def with_credential_restore(api_func):
     @wraps(api_func)
@@ -109,6 +126,8 @@ class BMC(BMCBase):
     ROOT_ACCOUNT_DEFAULT_PASSWORD = '0penBmcTempPass!'
     BMC_DIR = "/host/bmc"
     MAX_LOGIN_ERROR_PROBE_CNT = 5
+    # TODO(BMC): Should be removed after HW MGM and BMC will be aligned
+    BMC_TPM_HEX_FILE = "nvos_const.bin"
 
     _instance = None
 
@@ -150,7 +169,89 @@ class BMC(BMCBase):
         else:
             return BMC.BMC_NOS_ACCOUNT_DEFAULT_PASSWORD
 
+    # TODO(BMC): Should be removed after HW MGM and BMC will be aligned
+    # Currently, upon boot nos user password changed to tpm password by an old hw mgmt code
+    @under_lock(lockfile=f'{BMC_DIR}/{BMC_TPM_HEX_FILE}.lock', timeout=5)
     def get_login_password(self):
+        try:
+            pass_len = 13
+            attempt = 1
+            max_attempts = 100
+            max_repeat = int(3 + 0.09 * pass_len)
+            hex_data = "1300NVOS-BMC-USER-Const"
+            os.makedirs(self.BMC_DIR, exist_ok=True)
+            cmd = f'echo "{hex_data}" | xxd -r -p >  {self.BMC_DIR}/{self.BMC_TPM_HEX_FILE}'
+            subprocess.run(cmd, shell=True, check=True)
+
+            tpm_command = ["tpm2_createprimary", "-C", "o", "-u",  f"{self.BMC_DIR}/{self.BMC_TPM_HEX_FILE}", "-G", "aes256cfb"]
+            result = subprocess.run(tpm_command, capture_output=True, check=True, text=True)
+
+            while attempt <= max_attempts:
+                if attempt > 1:
+                    const = f"1300NVOS-BMC-USER-Const-{attempt}"
+                    mess = f"Password did not meet criteria; retrying with const: {const}"
+                    logger.log_debug(mess)
+                    tpm_command = f'echo -n "{const}" | tpm2_createprimary -C o -G aes -u -'
+                    result = subprocess.run(tpm_command, shell=True, capture_output=True, check=True, text=True)
+
+                symcipher_pattern = r"symcipher:\s+([\da-fA-F]+)"
+                symcipher_match = re.search(symcipher_pattern, result.stdout)
+
+                if not symcipher_match:
+                    raise Exception("Symmetric cipher not found in TPM output")
+
+                # BMC dictates a password of 13 characters. Random from TPM is used with an append of A!
+                symcipher_part = symcipher_match.group(1)[:pass_len-2]
+                if symcipher_part.isdigit():
+                    symcipher_value = symcipher_part[:pass_len-3] + 'vA!'
+                elif symcipher_part.isalpha() and symcipher_part.islower():
+                    symcipher_value = symcipher_part[:pass_len-3] + '9A!'
+                else:
+                    symcipher_value = symcipher_part + 'A!'
+                if len (symcipher_value) != pass_len:
+                    raise Exception("Bad cipher length from TPM output")
+                
+                # check for monotonic
+                monotonic_check = True
+                for i in range(len(symcipher_value) - 3): 
+                    seq = symcipher_value[i:i+4] 
+                    increments = [ord(seq[j+1]) - ord(seq[j]) for j in range(3)]
+                    if increments == [1, 1, 1] or increments == [-1, -1, -1]:
+                        monotonic_check = False
+                        break
+
+                variety_check = len(set(symcipher_value)) >= 5
+                repeating_pattern_check = sum(1 for i in range(pass_len - 1) if symcipher_value[i] == symcipher_value[i + 1]) <= max_repeat
+
+                # check for consecutive_pairs
+                count = 0
+                for i in range(11):
+                    val1 = symcipher_value[i]
+                    val2 = symcipher_value[i + 1]
+                    if val2 == "v" or val1 == "v":
+                        continue
+                    if abs(int(val2, 16) - int(val1, 16)) == 1:
+                        count += 1
+                consecutive_pair_check = count <= 4
+
+                if consecutive_pair_check and variety_check and repeating_pattern_check and monotonic_check:
+                    os.remove(f"{self.BMC_DIR}/{self.BMC_TPM_HEX_FILE}")
+                    return symcipher_value
+                else:
+                    attempt += 1
+
+            raise Exception("Failed to generate a valid password after maximum retries.")
+
+        except subprocess.CalledProcessError as e:
+            logger.log_error(f"Error executing TPM command: {e}")
+            raise Exception("Failed to communicate with TPM")
+
+        except Exception as e:
+            logger.log_error(f"Error: {e}")
+            raise
+
+    # TODO(BMC): Use it as the get_login_password after HW MGM and BMC will be aligned
+    def get_login_password_new_version(self):
         try:
             const = "1300SONIC-BMC-USER-Const"
             tpm_command = f'echo -n "{const}" | tpm2_createprimary -C o -G aes -u -'
