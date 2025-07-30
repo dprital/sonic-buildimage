@@ -25,7 +25,8 @@
 
 try:
     from functools import wraps
-    from hw_management_redfish_client import BMCAccessor
+    import sys
+    import importlib.util
     import os
     import subprocess
     from sonic_platform_base.bmc_base import BMCBase
@@ -38,7 +39,23 @@ except ImportError as e:
     raise ImportError (str(e) + "- required module not found")
 
 
+HW_MGMT_REDFISH_CLIENT_PATH = '/usr/bin/hw_management_redfish_client.py'
+HW_MGMT_REDFISH_CLIENT_NAME = 'hw_management_redfish_client'
+
+
 logger = Logger()
+
+
+def _get_hw_mgmt_redfish_client():
+    if HW_MGMT_REDFISH_CLIENT_NAME in sys.modules:
+        return sys.modules[HW_MGMT_REDFISH_CLIENT_NAME]
+    if not os.path.exists(HW_MGMT_REDFISH_CLIENT_PATH):
+        raise ImportError(f"{HW_MGMT_REDFISH_CLIENT_NAME} not found at {HW_MGMT_REDFISH_CLIENT_PATH}")
+    spec = importlib.util.spec_from_file_location(HW_MGMT_REDFISH_CLIENT_NAME, HW_MGMT_REDFISH_CLIENT_PATH)
+    hw_mgmt_redfish_client = importlib.util.module_from_spec(spec)
+    sys.modules[HW_MGMT_REDFISH_CLIENT_NAME] = hw_mgmt_redfish_client
+    spec.loader.exec_module(hw_mgmt_redfish_client)
+    return hw_mgmt_redfish_client
 
 
 def ping(host):
@@ -151,9 +168,9 @@ class BMC(BMCBase):
 
     def get_login_password(self):
         try:
-            return BMCAccessor().get_login_password()
+            return _get_hw_mgmt_redfish_client().BMCAccessor().get_login_password()
         except Exception as e:
-            logger.log_error(f"Error: {e}")
+            logger.log_error(f"Error getting login password: {str(e)}")
             raise
 
     def _restore_tpm_credential(self):
