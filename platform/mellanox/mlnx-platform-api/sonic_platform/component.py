@@ -910,16 +910,7 @@ class ComponentCPLDSN2201(ComponentCPLD):
 
         return True
 
-# TODO(BMC): Update platform_components.json files
-'''
-# attrs will come from platform_components.json and from get_component_list
-"BMC": {
-            "managed_by": "BMC",
-            "id": "MGX_FW_BMC_0",
-            "eeprom_id": "BMC_eeprom",
-            "class": "ComponentBMC"
-        }
-'''
+
 class ComponentBMCObj(Component):
 
     def __init__(self, name, attrs):

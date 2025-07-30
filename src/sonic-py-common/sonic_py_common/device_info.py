@@ -21,7 +21,6 @@ SONIC_VERSION_YAML_PATH = "/etc/sonic/sonic_version.yml"
 # Port configuration file names
 PORT_CONFIG_FILE = "port_config.ini"
 PLATFORM_JSON_FILE = "platform.json"
-# TODO(BMC): Create bmc.json files in device/mellanox/<>/bmc.json
 BMC_DATA_FILE = 'bmc.json'
 
 # Fabric port configuration file names
