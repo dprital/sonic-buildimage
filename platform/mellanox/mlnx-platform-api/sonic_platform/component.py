@@ -1031,11 +1031,7 @@ class ComponentBMCObj(Component):
         else:
             return eeprom_info.get('SerialNumber')
     
-    # TODO(BMC): Check if needed for indicate a power cycle requirement
-    '''
-    def get_firmware_update_notification(self, image_path):
-        return "A power cycle is required to complete {} firmware update".format(self.name)
-    '''
+    # TODO(BMC): Add get_firmware_update_notification if power cycle is needed
 
 class ComponentBMC(ComponentBMCObj):
     COMPONENT_NAME = 'BMC'
