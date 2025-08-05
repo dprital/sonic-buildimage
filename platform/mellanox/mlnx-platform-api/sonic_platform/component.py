@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2019-2024 NVIDIA CORPORATION & AFFILIATES.
+# Copyright (c) 2019-2025 NVIDIA CORPORATION & AFFILIATES.
 # Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -958,78 +958,7 @@ class ComponentBMCObj(Component):
             return (False, (error_msg, updated))
 
     def get_firmware_version(self):
-        ret = 0
-        version = 'N/A'
-        try:
-            ret, version =  self.bmc.get_firmware_version(self.get_firmware_id())
-        except Exception as e:
-            return 'N/A'
-        if (ret != 0):
-            return 'N/A'
-        return version
-
-    def get_eeprom_info(self):
-        eeprom_id = self.get_eeprom_id()
-        if eeprom_id is None:
-            print(" Can't read eeprom. Missing eeprom id.")
-            return {}
-        ret, eeprom_info = self.bmc.get_eeprom_info(eeprom_id)
-        if ret != 0:
-            print(f'Fail to get {eeprom_id} from BMC, error code: {ret}')
-        return eeprom_info
-
-    def _is_bmc_eeprom_content_valid(self, eeprom_info):
-        if None == eeprom_info or 0 == len(eeprom_info):
-            print(f'Got empty eeprom info: {eeprom_info}')
-            return False
-        got_error = eeprom_info.get('error')
-
-        if got_error:
-            print(f'Got error when quering eeprom: {got_error}')
-            return False
-        eeprom_error_code = eeprom_info.get('Error_code','ok')
-        eeprom_health = eeprom_info.get('Health','ok')
-
-        if eeprom_error_code.lower() != 'ok' or eeprom_health.lower() != 'ok':
-            print(f'Got eeprom info with bad statuses: {eeprom_info}')
-            return False
-        return True
-
-    def get_part_number(self):
-        if not self.get_eeprom_id():
-            print(f"Component {self.name} doesn't have eeprom id. Will not get part number")
-            return None
-
-        eeprom_info = self.get_eeprom_info()
-        if False == self._is_bmc_eeprom_content_valid(eeprom_info):
-            print(f"Can't get part number for BMC because eeprom is not valid")
-            return None
-        else:
-            return eeprom_info.get('PartNumber')
-
-    def get_model(self):
-        if not self.get_eeprom_id():
-            print(f"Component {self.name} doesn't have eeprom id. Will not get model")
-            return None
-
-        eeprom_info = self.get_eeprom_info()
-        if False == self._is_bmc_eeprom_content_valid(eeprom_info):
-            print(f"Can't get model for BMC because eeprom is not valid")
-            return None
-        else:
-            return eeprom_info.get('Model')
-
-    def get_serial_number(self):
-        if not self.get_eeprom_id():
-            print(f"Component {self.name} doesn't have eeprom id. Will not get serial number")
-            return None
-
-        eeprom_info = self.get_eeprom_info()
-        if False == self._is_bmc_eeprom_content_valid(eeprom_info):
-            print(f"Can't get serial number for BMC because eeprom is not valid")
-            return None
-        else:
-            return eeprom_info.get('SerialNumber')
+        return self.bmc.get_version()
     
     # TODO(BMC): Add get_firmware_update_notification if power cycle is needed
 

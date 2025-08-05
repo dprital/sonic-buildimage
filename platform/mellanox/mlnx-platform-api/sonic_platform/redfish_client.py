@@ -555,7 +555,7 @@ class RedfishClient:
     Example of Payload:
         "Payload": {
             "HttpHeaders": [
-            "Host: 10.0.1.1",
+            "Host: 169.254.0.1",
             "User-Agent: curl/7.74.0",
             "Accept: */*",
             "Content-Length: 76",
