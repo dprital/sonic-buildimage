@@ -96,7 +96,7 @@ class TestBMC:
         mock_logout.return_value = RedfishClient.ERR_CODE_OK
 
         bmc = BMC.get_instance()
-        ret, msg = bmc.reset_password()
+        ret, msg = bmc.reset_root_password()
 
         assert ret == RedfishClient.ERR_CODE_OK
         assert msg == 'Password changed successfully'
