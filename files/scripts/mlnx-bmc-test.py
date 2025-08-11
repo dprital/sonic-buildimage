@@ -47,28 +47,6 @@ def test_get_bmc_eeprom_list(bmc):
         return False
 
 
-def test_get_bmc_eeprom_info(bmc, eeprom_id):
-    """Test get BMC EEPROM info API"""
-    print("\n=== Testing Get BMC EEPROM Info ===")
-    if not eeprom_id:
-        print("X No EEPROM ID provided, skipping get BMC EEPROM info test")
-        return False
-    try:
-        print(f"Getting EEPROM info for ID: {eeprom_id}")
-        ret, eeprom_data = bmc.get_eeprom_info(eeprom_id)
-        print(f"Get EEPROM info result: {ret}")
-        if ret == 0:
-            print(f"V BMC EEPROM info retrieved successfully")
-            print(f"EEPROM data: {eeprom_data}")
-            return True
-        else:
-            print(f"X Failed to get BMC EEPROM info: {eeprom_data}")
-            return False
-    except Exception as e:
-        print(f"X Exception getting BMC EEPROM info: {e}")
-        return False
-
-
 def test_get_bmc_firmware_list(bmc):
     """Test get BMC firmware list API"""
     print("\n=== Testing Get BMC Firmware List ===")
@@ -87,28 +65,6 @@ def test_get_bmc_firmware_list(bmc):
             return False
     except Exception as e:
         print(f"X Exception getting BMC firmware list: {e}")
-        return False
-
-
-def test_get_bmc_firmware_version(bmc, fw_id):
-    """Test get BMC firmware version API"""
-    print("\n=== Testing Get BMC Firmware Version ===")
-    if not fw_id:
-        print("X No firmware ID provided, skipping get BMC firmware version test")
-        return False
-    try:
-        print(f"Getting firmware version for ID: {fw_id}")
-        ret, version = bmc.get_firmware_version(fw_id)
-        print(f"Get firmware version result: {ret}")
-        if ret == 0:
-            print(f"V BMC firmware version retrieved successfully")
-            print(f"Firmware version: {version}")
-            return True
-        else:
-            print(f"X Failed to get BMC firmware version: {version}")
-            return False
-    except Exception as e:
-        print(f"X Exception getting BMC firmware version: {e}")
         return False
 
 
@@ -227,7 +183,7 @@ def test_reset_password(bmc):
     
     try:
         print("Testing password reset...")
-        ret, msg = bmc.reset_password()
+        ret, msg = bmc.reset_root_password()
         print(f"Reset password result: {ret}")
         print(f"Message: {msg}")
         
@@ -436,9 +392,7 @@ def run_api_test(bmc, api_name, **kwargs):
         'get_version': test_get_bmc_version,
         'get_ip': test_get_bmc_ip_addr,
         'get_eeprom_list': test_get_bmc_eeprom_list,
-        'get_eeprom_info': lambda bmc: test_get_bmc_eeprom_info(bmc, kwargs.get('eeprom_id')),
         'get_firmware_list': test_get_bmc_firmware_list,
-        'get_firmware_version': lambda bmc: test_get_bmc_firmware_version(bmc, kwargs.get('fw_id')),
         'trigger_dump': test_trigger_bmc_debug_log_dump,
         'get_dump': lambda bmc: test_get_bmc_debug_log_dump(bmc, kwargs.get('task_id')),
         'change_password': test_change_password,
@@ -488,12 +442,6 @@ if __name__ == '__main__':
 
     bmc_ip = bmc.get_ip_addr()
     print(f"BMC IP address: {bmc_ip}")
-
-    if not bmc.wait_until_reachable(10):
-        print(f'X BMC {bmc_ip} not reachable')
-        sys.exit(2)
-
-    print(f'V BMC {bmc_ip} is reachable')
 
     if args.test == 'get_dump' and not args.task_id:
         print("X --task-id is required for get_dump test")

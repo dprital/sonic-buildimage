@@ -144,13 +144,11 @@ class BMC(BMCBase):
 
     @staticmethod
     def get_instance():
-        bmc_data = device_info.get_bmc_data()
-        if not bmc_data:
-            return None
-
         if BMC._instance is None:
+            bmc_data = device_info.get_bmc_data()
+            if not bmc_data:
+                return None
             BMC._instance = BMC(bmc_data['bmc_addr'])
-
         return BMC._instance
 
     def get_ip_addr(self):
@@ -285,18 +283,6 @@ class BMC(BMCBase):
 
         return comp_list
 
-    def get_component_by_name(self, name):
-        comp_list = list(filter(lambda comp: comp.name == name, self.get_component_list()))
-        return comp_list[0] if len(comp_list) > 0 else None
-
-    def get_component_by_fw_id(self, fw_id):
-        comp_list = list(filter(lambda comp: comp.fw_id == fw_id, self.get_component_list()))
-        return comp_list[0] if len(comp_list) > 0 else None
-
-    def get_component_list_by_type(self, type_name):
-        comp_list = list(filter(lambda comp: comp.type_name == type_name, self.get_component_list()))
-        return comp_list
-
     def login(self):
         logger.log_notice(f'Try login to BMC using the NOS account')
         if self.rf_client is None:
@@ -330,14 +316,6 @@ class BMC(BMCBase):
     def enable_log(self, enable=True):
         self.rf_client.enable_log(enable)
     
-    def wait_until_reachable(self, timeout):
-        start_time = time.time()
-        while time.time() - start_time < timeout:
-            if ping(self.addr):
-                return True
-            time.sleep(1)
-        return False
-    
     def _is_bmc_eeprom_content_valid(self, eeprom_info):
         if None == eeprom_info or 0 == len(eeprom_info):
             return False
@@ -345,6 +323,7 @@ class BMC(BMCBase):
         if got_error:
             logger.log_error(f'Got error when quering eeprom: {got_error}')
             return False
+        return True
 
     def get_name(self):
         return 'BMC'
@@ -425,13 +404,11 @@ class BMC(BMCBase):
     def update_firmware(self, fw_image, fw_ids=None, force_update=False, progress_callback=None, timeout=1800):
         # First try to update without force
         logger.log_notice(f'Installing firmware image {fw_image} via BMC, force_update: {force_update}')
-        result = self.rf_client.redfish_api_update_firmware(fw_image,
+        ret, msg, updated_components, skipped_components = self.rf_client.redfish_api_update_firmware(fw_image,
                                                             fw_ids,
                                                             force_update,
                                                             timeout,
                                                             progress_callback)
-        ret, msg, updated_components, skipped_components = result
-
         logger.log_notice(f'Firmware update result: {ret}')
         if msg:
             logger.log_notice(f'{msg}')
@@ -448,13 +425,11 @@ class BMC(BMCBase):
 
             logger.log_notice(f'Firmware image timestamp is lower than the current timestamp')
             logger.log_notice(f'Attempting to force update')
-            result = self.rf_client.redfish_api_update_firmware(fw_image,
+            ret, msg, updated_components, skipped_components = self.rf_client.redfish_api_update_firmware(fw_image,
                                                                 fw_ids,
                                                                 True,
                                                                 timeout,
                                                                 progress_callback)
-            ret, msg, updated_components, skipped_components = result
-
             logger.log_notice(f'Firmware update result: {ret}')
             if msg:
                 logger.log_notice(f'{msg}')
@@ -479,7 +454,7 @@ class BMC(BMCBase):
     def get_bmc_debug_log_dump(self, task_id, filename, path, timeout = 120):
         return self.rf_client.redfish_api_get_bmc_debug_log_dump(task_id, filename, path, timeout)
     
-    def reset_password(self):
+    def reset_root_password(self):
         try:
             self.login()
             (ret, msg) = self.change_login_password(BMC.ROOT_ACCOUNT_DEFAULT_PASSWORD, BMC.ROOT_ACCOUNT)

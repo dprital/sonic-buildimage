@@ -953,7 +953,7 @@ def get_bmc_data():
         json_file = os.path.join(platform_path, BMC_DATA_FILE)
         if os.path.exists(json_file):
             with open(json_file, "r") as f:
-                bmc_data = json.loads(f.read())
+                bmc_data = json.load(f)
             return bmc_data
         else:
             return None

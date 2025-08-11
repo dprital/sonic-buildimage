@@ -27,7 +27,6 @@
 try:
     from sonic_platform_base.chassis_base import ChassisBase
     from sonic_py_common.logger import Logger
-    from sonic_py_common.device_info import get_bmc_data
     import os
     from sonic_py_common import device_info
     from functools import reduce
@@ -1098,27 +1097,18 @@ class Chassis(ChassisBase):
     def initialize_bmc(self):
         if self._bmc_initialized:
             return
-
-        self._bmc_data = get_bmc_data()
-
-        if self._bmc_data:
-            self._bmc = BMC.get_instance()
-
+        self._bmc = BMC.get_instance()
+        if self._bmc is not None:
             try:
                 bmc_comp_list = self._bmc.get_component_list()
                 self._component_list.extend(bmc_comp_list)
             except Exception as e:
                 logger.log_error("Fail to get BMC component list")
-
         self._bmc_initialized = True
 
     def _initialize_bmc(self):
         self.initialize_components()
         self.initialize_bmc()
-
-    def get_bmc_data(self):
-        self._initialize_bmc()
-        return self._bmc_data
 
     def get_bmc(self):
         self._initialize_bmc()
