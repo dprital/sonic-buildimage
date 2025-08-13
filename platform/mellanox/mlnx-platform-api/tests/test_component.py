@@ -594,6 +594,5 @@ class TestComponent:
             'eeprom_id': 'BMC_eeprom'
         }
         component = ComponentBMC('BMC', attrs)
-        ret, (error_msg, updated) = component.install_firmware('fake_image.fwpkg')
-        assert ret == True
-        assert updated == True
+        ret = component.install_firmware('fake_image.fwpkg')
+        assert True == ret

@@ -35,8 +35,7 @@ setup(
         'pytest-runner'
     ],
     install_requires= [
-        'inotify',
-        'filelock',
+        'inotify'
     ],
     tests_require = [
         'pytest',
