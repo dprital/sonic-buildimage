@@ -933,8 +933,8 @@ class ComponentBMCObj(Component):
     def install_firmware(self, image_path, allow_reboot=True, force_update=False, progress_callback=None):
         if not self._check_file_validity(image_path):
             return (False, ('Invalid firmware image path', False))
-        print('Starting {} firmware update, path={}'.format(self.get_firmware_id(), image_path))
 
+        print('Starting {} firmware update, path={}'.format(self.get_firmware_id(), image_path))
         ret = 0
         error_msg = ''
         updated = False
@@ -951,11 +951,14 @@ class ComponentBMCObj(Component):
             raise
 
         if (ret == 0):
+            if not updated:
+                print('No BMC firmware update')
+            print('Successfully upgraded BMC firmware')
             # TODO(BMC): Check if power cycle is required for apply the installation
-            return (True, (error_msg, updated))
+            return True
         else:
-            print(f'Fail to upgrade {self.get_firmware_id()} firmware ({error_msg})')
-            return (False, (error_msg, updated))
+            print(f'Fail to upgrade BMC firmware. Error {ret}: {error_msg}')
+            return False
 
     def get_firmware_version(self):
         return self.bmc.get_version()

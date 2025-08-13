@@ -30,8 +30,6 @@ sys.path.insert(0, modules_path)
 
 from sonic_platform.bmc import BMC
 from sonic_platform.redfish_client import RedfishClient
-from sonic_py_common import device_info
-from sonic_platform import utils
 
 
 class MockBMCComponent:
