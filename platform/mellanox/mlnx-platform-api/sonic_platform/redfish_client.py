@@ -230,6 +230,9 @@ class RedfishClient:
 
     def enable_log(self, enable = True):
         self.__log_enable = enable
+    
+    def get_login_token(self):
+        return self.__token
 
     def curl_errors_to_redfish_erros_translation(self, curl_error):
         return self.CURL_TO_REDFISH_ERROR_MAP.get(
