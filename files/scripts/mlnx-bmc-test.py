@@ -160,7 +160,7 @@ def test_change_password(bmc):
             print("Failed to login to BMC")
             return False
         user = 'root'
-        password = '0penBmcTempPass!'
+        password = 'ABYX12#14artb'
         
         ret, msg = bmc.change_login_password(password, user)
         print(f"Change password result: {ret}")
@@ -321,17 +321,9 @@ def test_upgrade_bmc_firmware(bmc, fw_image, target=None, force_update=False, ti
         print(f"X Firmware image file not found: {fw_image}")
         return False
     
-    fw_ids = []
-    if target:
-        fw_ids = [fw_id.strip() for fw_id in target.split(",")]
-        print(f'Flashing {fw_image} to {fw_ids}...')
-    else:
-        print(f'Flashing {fw_image} to BMC...')
-
-    print(f'Force update: {force_update}')
+    print(f'Flashing {fw_image} to BMC...')
 
     pbar = tqdm.tqdm(total=100)
-
     def create_progress_callback():
         last_percent = 0
 
@@ -347,26 +339,15 @@ def test_upgrade_bmc_firmware(bmc, fw_image, target=None, force_update=False, ti
     progress_callback = create_progress_callback()
 
     start = time.time()
-
     try:
-        ret, result = bmc.update_firmware(fw_image,
-                                         fw_ids=fw_ids if fw_ids else None,
-                                         force_update=force_update,
-                                         progress_callback=progress_callback,
-                                         timeout=timeout)
-
+        ret, msg = bmc.update_firmware(fw_image)
         pbar.close()
-
         print(f'Time elapsed: {int((time.time() - start) * 10) / 10}s')
-
         if ret == 0:
-            msg, updated = result
-            print('V Firmware is successfully updated')
-            print(f'Message: {msg}')
-            print(f'Updated: {updated}')
+            print(f'V Firmware is successfully updated: {msg}')
             return True
         else:
-            print(f'X Fail to update firmware. {result}')
+            print(f'X Fail to update firmware {ret} {msg}')
             return False
     except Exception as e:
         pbar.close()
@@ -397,7 +378,7 @@ def run_api_test(bmc, api_name, **kwargs):
         'get_dump': lambda bmc: test_get_bmc_debug_log_dump(bmc, kwargs.get('task_id')),
         'change_password': test_change_password,
         'reset_password': test_reset_password,
-        'upgrade_firmware': lambda bmc: test_upgrade_bmc_firmware(bmc, kwargs.get('fw_image'), kwargs.get('target'), kwargs.get('force_update', False)),
+        'upgrade_firmware': lambda bmc: test_upgrade_bmc_firmware(bmc, kwargs.get('fw_image')),
         'power_cycle': lambda bmc: test_request_power_cycle(bmc, kwargs.get('immediate', False)),
     }
     
@@ -422,11 +403,9 @@ if __name__ == '__main__':
                         required=True, help="Test a specific BMC API")
     parser.add_argument("--task-id", help="Task ID for get_dump test")
     parser.add_argument("--fw-image", help="Firmware image file for upgrade_firmware test")
-    parser.add_argument("--target", help="Target firmware IDs for upgrade (comma-separated)")
     parser.add_argument("--eeprom-id", help="EEPROM ID for get_eeprom_info test")
     parser.add_argument("--fw-id", help="Firmware ID for get_firmware_version test")
     parser.add_argument("--immediate", action="store_true", help="Immediate power cycle for power_cycle test")
-    parser.add_argument("--force-update", action="store_true", help="Force firmware update for upgrade_firmware test")
 
     args = parser.parse_args()
 
@@ -464,16 +443,12 @@ if __name__ == '__main__':
         kwargs['task_id'] = args.task_id
     if args.fw_image:
         kwargs['fw_image'] = args.fw_image
-    if args.target:
-        kwargs['target'] = args.target
     if args.eeprom_id:
         kwargs['eeprom_id'] = args.eeprom_id
     if args.fw_id:
         kwargs['fw_id'] = args.fw_id
     if args.immediate:
         kwargs['immediate'] = args.immediate
-    if args.force_update:
-        kwargs['force_update'] = args.force_update
 
     run_api_test(bmc, args.test, **kwargs)
     try:
