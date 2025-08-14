@@ -951,11 +951,9 @@ class RedfishClient:
     Parameters:
       fw_image    firmware image path
       timeout     timeout value in seconds
-    Return value:  (ret, error_msg, updated_components, skipped_components)
+    Return value:  (ret, error_msg)
       ret                  return code
       error_msg            error message string
-      updated_components   list of updated components
-      skipped_components   list of skipped components
     '''
     def redfish_api_update_firmware(self, fw_image, fw_ids = None, \
             force_update=False, timeout=1800, progress_callback=None):
@@ -1000,9 +998,6 @@ class RedfishClient:
         lower_version = result.get('lower_version', False)
         identical_version = result.get('identical_version', False)
         err_detected = result.get('err_detected', False)
-        aborted = result.get('aborted', False)
-        updated_components = result.get('updated_components', [])
-        skipped_components = result.get('skipped_components', [])
 
         if lower_version:
            result['ret_code'] = RedfishClient.ERR_CODE_LOWER_VERSION
@@ -1014,7 +1009,7 @@ class RedfishClient:
         ret = result['ret_code']
         error_msg = result['ret_msg']
 
-        return (ret, error_msg, updated_components, skipped_components)
+        return (ret, error_msg)
 
 
     '''
@@ -1279,13 +1274,6 @@ class RedfishClient:
         valid, err_msg = self.__validate_message_args(event_msg)
         if not valid:
             return (RedfishClient.ERR_CODE_INVALID_JSON_FORMAT, err_msg)
-
-        comp_id = event_msg['MessageArgs'][0]
-        if 'updated_components' in context:
-            context['updated_components'].append(comp_id)
-        else:
-            context['updated_components'] = [comp_id]
-
         return (RedfishClient.ERR_CODE_OK, '')
 
     '''
@@ -1295,14 +1283,7 @@ class RedfishClient:
         valid, err_msg = self.__validate_message_args(event_msg)
         if not valid:
             return (RedfishClient.ERR_CODE_INVALID_JSON_FORMAT, err_msg)
-
-        comp_id = event_msg['MessageArgs'][0]
-        if 'skipped_components' in context:
-            context['skipped_components'].append(comp_id)
-        else:
-            context['skipped_components'] = [comp_id]
         context['identical_version'] = True
-
         return (RedfishClient.ERR_CODE_OK, '')
 
     '''
@@ -1322,13 +1303,6 @@ class RedfishClient:
 
         # Identical version detected
         if IDENTICAL_VER_STR in err_str:
-            # For Some components like FPGA, identical version
-            # indication is reported as error. We do not treat
-            # it as error here. Just mark it.
-            if 'skipped_components' in context:
-                context['skipped_components'].append(comp_id)
-            else:
-                context['skipped_components'] = [comp_id]
             context['identical_version'] = True
 
             return (RedfishClient.ERR_CODE_OK, '')
