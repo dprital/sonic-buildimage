@@ -401,50 +401,29 @@ class BMC(BMCBase):
             sytem_reset_type=RedfishClient.SYSTEM_RESET_TYPE_CPU_RESET, immediate=True)
 
     @with_credential_restore
-    def update_firmware(self, fw_image, fw_ids=None, force_update=False, progress_callback=None, timeout=1800):
-        # First try to update without force
-        logger.log_notice(f'Installing firmware image {fw_image} via BMC, force_update: {force_update}')
-        ret, msg, updated_components, skipped_components = self.rf_client.redfish_api_update_firmware(fw_image,
+    def update_components_firmware(self, fw_image, fw_ids=None, force_update=False, progress_callback=None, timeout=1800):
+        logger.log_notice(f'Installing BMC firmware image {fw_image}')
+        ret, msg = self.rf_client.redfish_api_update_firmware(fw_image,
                                                             fw_ids,
                                                             force_update,
                                                             timeout,
                                                             progress_callback)
         logger.log_notice(f'Firmware update result: {ret}')
+
+        # Downgrade detected
+        if ret == RedfishClient.ERR_CODE_LOWER_VERSION:
+            logger.log_notice(f'Firmware image timestamp is lower than the current timestamp')
+
         if msg:
+            # Replace BMC internal firmware id with component display name in the message
+            for comp in self.get_component_list():
+                msg = msg.replace(comp.get_firmware_id(), comp.get_name())
             logger.log_notice(f'{msg}')
 
-        # Downgrade detected, try to do force update
-        if (not force_update) and (ret == RedfishClient.ERR_CODE_LOWER_VERSION):
-            # Exclude the components that have already been updated or skipped
-            if fw_ids:
-                fw_ids = [comp for comp in fw_ids if comp not in updated_components]
-                fw_ids = [comp for comp in fw_ids if comp not in skipped_components]
-
-            prev_updated_components = updated_components
-            prev_msg = msg
-
-            logger.log_notice(f'Firmware image timestamp is lower than the current timestamp')
-            logger.log_notice(f'Attempting to force update')
-            ret, msg, updated_components, skipped_components = self.rf_client.redfish_api_update_firmware(fw_image,
-                                                                fw_ids,
-                                                                True,
-                                                                timeout,
-                                                                progress_callback)
-            logger.log_notice(f'Firmware update result: {ret}')
-            if msg:
-                logger.log_notice(f'{msg}')
-
-            msg = prev_msg + msg
-            updated_components = prev_updated_components + updated_components
-
-        # Replace BMC internal firmware id with component display name in the message
-        for comp in self.get_component_list():
-            msg = msg.replace(comp.get_firmware_id(), comp.get_name())
-
-        # Set updated flag to True if there are components updated
-        updated = (len(updated_components) > 0)
-
-        return (ret, (msg, updated))
+        return (ret, msg)
+    
+    def update_firmware(self, fw_image):
+        return self.update_components_firmware(fw_image)
 
     @with_credential_restore
     def trigger_bmc_debug_log_dump(self):

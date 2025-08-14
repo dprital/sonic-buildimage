@@ -930,29 +930,22 @@ class ComponentBMCObj(Component):
     def get_eeprom_id(self):
         return self.eeprom_id
 
-    def install_firmware(self, image_path, allow_reboot=True, force_update=False, progress_callback=None):
+    def install_firmware(self, image_path):
         if not self._check_file_validity(image_path):
             return (False, ('Invalid firmware image path', False))
-
         print('Starting {} firmware update, path={}'.format(self.get_firmware_id(), image_path))
         ret = 0
         error_msg = ''
-        updated = False
 
         try:
-            ret, (error_msg, updated) = self.bmc.update_firmware(image_path,
-                                                                 [],
-                                                                 force_update,
-                                                                 progress_callback)
+            ret, error_msg = self.bmc.update_firmware(image_path)
         except Exception as e:
             error_trace = traceback.format_exc()
             print(str(e))
             print(error_trace)
             raise
 
-        if (ret == 0):
-            if not updated:
-                print('No BMC firmware update')
+        if ret == 0:
             print('Successfully upgraded BMC firmware')
             # TODO(BMC): Check if power cycle is required for apply the installation
             return True

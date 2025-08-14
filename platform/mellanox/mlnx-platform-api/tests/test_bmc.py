@@ -145,9 +145,8 @@ class TestBMC:
     @mock.patch('sonic_platform.redfish_client.RedfishClient.login')
     def test_bmc_update_firmware(self, mock_login, mock_update_fw):
         """Test update_firmware method with successful update without force"""
-        component_id = 'MGX_FW_BMC_0'
         mock_login.return_value = RedfishClient.ERR_CODE_OK
-        mock_update_fw.return_value = (RedfishClient.ERR_CODE_OK, 'Update successful', [component_id], [])
+        mock_update_fw.return_value = (RedfishClient.ERR_CODE_OK, 'Update successful')
 
         bmc = BMC.get_instance()
         ret, (msg, updated) = bmc.update_firmware('fake_image.fwpkg')
