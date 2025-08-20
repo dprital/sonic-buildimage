@@ -29,6 +29,7 @@ try:
     import importlib.util
     import os
     import subprocess
+    import filelock
     from sonic_platform_base.bmc_base import BMCBase
     from sonic_py_common import device_info
     from sonic_py_common.logger import Logger
@@ -44,6 +45,18 @@ HW_MGMT_REDFISH_CLIENT_NAME = 'hw_management_redfish_client'
 
 
 logger = Logger()
+
+
+def under_lock(lockfile, timeout=2):
+    """ Execute operations under lock. """
+    def _under_lock(func):
+        @wraps(func)
+        def wrapped_function(*args, **kwargs):
+            with filelock.FileLock(lockfile, timeout):
+                return func(*args, **kwargs)
+
+        return wrapped_function
+    return _under_lock
 
 
 def _get_hw_mgmt_redfish_client():
@@ -170,8 +183,8 @@ class BMC(BMCBase):
             logger.log_error(f"Error getting login password: {str(e)}")
             raise
 
+    @under_lock(lockfile='/var/run/bmc_restore_tpm_credential.lock', timeout=5)
     def _restore_tpm_credential(self):
-
         logger.log_notice(f'Start BMC TPM password recovery flow')
 
         # We are not good with TPM based password here.
