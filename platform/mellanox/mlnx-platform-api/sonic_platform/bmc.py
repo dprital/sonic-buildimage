@@ -411,7 +411,7 @@ class BMC(BMCBase):
         logger.log_notice(f'Firmware update result: {ret}')
 
         # Downgrade detected
-        if ret == RedfishClient.ERR_CODE_LOWER_VERSION:
+        if force_update == False and ret == RedfishClient.ERR_CODE_LOWER_VERSION:
             logger.log_notice(f'Firmware image timestamp is lower than the current timestamp')
 
         if msg:
@@ -423,7 +423,11 @@ class BMC(BMCBase):
         return (ret, msg)
     
     def update_firmware(self, fw_image):
-        return self.update_components_firmware(fw_image)
+        ret, msg = self.update_components_firmware(fw_image)
+        if ret == RedfishClient.ERR_CODE_LOWER_VERSION:
+            logger.log_notice(f'Try to update BMC firmware with force update for downgrading')
+            ret, msg = self.update_components_firmware(fw_image, force_update=True)
+        return (ret, msg)
 
     @with_credential_restore
     def trigger_bmc_debug_log_dump(self):
@@ -461,7 +465,7 @@ class BMC(BMCBase):
         ret = 0
         version = 'N/A'
         try:
-            fw_id = self.get_component_attr('BMC', 'id')
+            fw_id = self.get_id()
             if not fw_id:
                 logger.log_error('BMC firmware ID is not defined')
                 return 'N/A'
