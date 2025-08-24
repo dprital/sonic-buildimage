@@ -947,7 +947,7 @@ class ComponentBMCObj(Component):
 
         if ret == 0:
             print('Successfully upgraded BMC firmware')
-            # TODO(BMC): Check if power cycle is required for apply the installation
+            # TODO(BMC): Check if self.bmc.request_bmc_reset is required for apply the installation
             return True
         else:
             print(f'Fail to upgrade BMC firmware. Error {ret}: {error_msg}')
@@ -956,7 +956,7 @@ class ComponentBMCObj(Component):
     def get_firmware_version(self):
         return self.bmc.get_version()
     
-    # TODO(BMC): Add get_firmware_update_notification if power cycle is needed
+    # TODO(BMC): Add get_firmware_update_notification if self.bmc.request_bmc_reset is needed
 
 class ComponentBMC(ComponentBMCObj):
     COMPONENT_NAME = 'BMC'
