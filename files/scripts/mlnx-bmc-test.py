@@ -289,27 +289,20 @@ def test_is_bmc_replaceable(bmc):
         return False
 
 
-def test_request_power_cycle(bmc, immediate=False):
-    """Test BMC power cycle API"""
-    print("\n=== Testing BMC Power Cycle ===")
-    
+def test_request_reset_bmc(bmc):
+    """Test BMC reset API"""
+    print("\n=== Testing BMC reset ===")
     try:
-        print(f"Requesting power cycle (immediate: {immediate})...")
-        ret, err_msg = bmc.request_power_cycle(immediate)
-        print(f"Power cycle result: {ret}")
-        
+        ret, err_msg = bmc.request_bmc_reset()
+        print(f"Bmc reset request result: {ret}")
         if ret == 0:
-            print("V BMC power cycle request successful")
-            if immediate:
-                print("System will power cycle immediately")
-            else:
-                print("System will power cycle gracefully")
+            print("V BMC reset request successful")
+            return True
         else:
-            print(f"X Failed to request BMC power cycle: {err_msg}")
-        
-        return ret == 0
+            print(f"X BMC reset request failed: {err_msg}")
+            return False
     except Exception as e:
-        print(f"X Exception during power cycle request: {e}")
+        print(f"X Exception during bmc reset request: {e}")
         return False
 
 
@@ -379,7 +372,7 @@ def run_api_test(bmc, api_name, **kwargs):
         'change_password': test_change_password,
         'reset_password': test_reset_password,
         'upgrade_firmware': lambda bmc: test_upgrade_bmc_firmware(bmc, kwargs.get('fw_image')),
-        'power_cycle': lambda bmc: test_request_power_cycle(bmc, kwargs.get('immediate', False)),
+        'bmc_reset': lambda bmc: test_request_reset_bmc(bmc),
     }
     
     if api_name in api_tests:
@@ -399,13 +392,12 @@ if __name__ == '__main__':
     parser.add_argument("--test", choices=['get_name', 'get_presence', 'get_model', 'get_serial', 'get_revision', 'get_status',
                                            'is_replaceable', 'get_eeprom', 'get_version', 'get_ip', 'get_eeprom_list',
                                            'get_eeprom_info', 'get_firmware_list', 'get_firmware_version', 'trigger_dump',
-                                           'get_dump', 'change_password', 'reset_password', 'upgrade_firmware', 'power_cycle'],
+                                           'get_dump', 'change_password', 'reset_password', 'upgrade_firmware', 'bmc_reset'],
                         required=True, help="Test a specific BMC API")
     parser.add_argument("--task-id", help="Task ID for get_dump test")
     parser.add_argument("--fw-image", help="Firmware image file for upgrade_firmware test")
     parser.add_argument("--eeprom-id", help="EEPROM ID for get_eeprom_info test")
     parser.add_argument("--fw-id", help="Firmware ID for get_firmware_version test")
-    parser.add_argument("--immediate", action="store_true", help="Immediate power cycle for power_cycle test")
 
     args = parser.parse_args()
 
@@ -447,8 +439,6 @@ if __name__ == '__main__':
         kwargs['eeprom_id'] = args.eeprom_id
     if args.fw_id:
         kwargs['fw_id'] = args.fw_id
-    if args.immediate:
-        kwargs['immediate'] = args.immediate
 
     run_api_test(bmc, args.test, **kwargs)
     try:
