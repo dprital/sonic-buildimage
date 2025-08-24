@@ -414,6 +414,11 @@ class BMC(BMCBase):
             sytem_reset_type=RedfishClient.SYSTEM_RESET_TYPE_CPU_RESET, immediate=True)
 
     @with_credential_restore
+    def request_bmc_reset(self, graceful=True):
+        bmc_reset_type = RedfishClient.BMC_RESET_TYPE_GRACEFUL_RESTART if graceful else RedfishClient.BMC_RESET_TYPE_FORCE_RESTART
+        return self.rf_client.redfish_api_request_bmc_reset(bmc_reset_type=bmc_reset_type)
+
+    @with_credential_restore
     def update_components_firmware(self, fw_image, fw_ids=None, force_update=False, progress_callback=None, timeout=1800):
         logger.log_notice(f'Installing BMC firmware image {fw_image}')
         ret, msg = self.rf_client.redfish_api_update_firmware(fw_image,

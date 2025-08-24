@@ -101,6 +101,7 @@ class RedfishClient:
     REDFISH_DEBUG_TOKEN = '/redfish/v1/Systems/System_0/LogServices/DebugTokenService'
     REDFISH_BMC_LOG_DUMP = '/redfish/v1/Managers/BMC_0/LogServices/Dump/Actions'
     REDFISH_REQUEST_SYSTEM_RESET = '/redfish/v1/Systems/System_0/Actions/ComputerSystem.Reset'
+    REDFISH_REQUEST_BMC_RESET = '/redfish/v1/Managers/BMC_0/Actions/Manager.Reset'
     REDFISH_URI_CHASSIS = '/redfish/v1/Chassis'
 
     # For now we have only 1 command for doing power cycle,
@@ -111,6 +112,10 @@ class RedfishClient:
     REDFISH_GRACEFULL_POWER_CYCLE = 'PowerCycle'
     REDFISH_POWER_CYCLE_BYPASS = 'PowerCycleBypass'
     REDFISH_FORCE_RESTART = 'ForceRestart'
+    
+    # BMC reset types
+    REDFISH_BMC_GRACEFUL_RESTART = 'GracefulRestart'
+    REDFISH_BMC_FORCE_RESTART = 'ForceRestart'
 
     # Error code definitions
     ERR_CODE_OK = 0
@@ -151,6 +156,15 @@ class RedfishClient:
         'ForceRestart',
         'PowerCycle',
         'PowerCycleBypass'
+    ]
+
+    # BMC reset type
+    BMC_RESET_TYPE_GRACEFUL_RESTART = 0
+    BMC_RESET_TYPE_FORCE_RESTART = 1
+
+    BMC_RESET_TYPE_MAP = [
+        'GracefulRestart',
+        'ForceRestart'
     ]
 
     '''
@@ -323,6 +337,23 @@ class RedfishClient:
               f'-H "Content-Type: application/json" ' \
               f'-X POST https://{self.__svr_ip}' \
               f'{RedfishClient.REDFISH_REQUEST_SYSTEM_RESET} ' \
+              f'-d \'{{"ResetType": "{reset_type}"}}\''
+
+        return cmd
+
+    '''
+    Build the POST command to request BMC reset
+    '''
+    def __build_request_bmc_reset_cmd(self, bmc_reset_type):
+        if bmc_reset_type == RedfishClient.BMC_RESET_TYPE_FORCE_RESTART:
+            reset_type = RedfishClient.REDFISH_BMC_FORCE_RESTART
+        else:
+            reset_type = RedfishClient.REDFISH_BMC_GRACEFUL_RESTART
+
+        cmd = f'{self.__curl_path} -k -H "X-Auth-Token: {self.__token}" ' \
+              f'-H "Content-Type: application/json" ' \
+              f'-X POST https://{self.__svr_ip}' \
+              f'{RedfishClient.REDFISH_REQUEST_BMC_RESET} ' \
               f'-d \'{{"ResetType": "{reset_type}"}}\''
 
         return cmd
@@ -1590,6 +1621,61 @@ class RedfishClient:
 
         reset_type = RedfishClient.SYSTEM_RESET_TYPE_MAP[sytem_reset_type]
         self.log_notice(f"After requesting {reset_type}, got response {response} and error {err_msg}")
+
+        try:
+            json_response = json.loads(response)
+        except json.JSONDecodeError as e:
+            msg = 'Error: Invalid JSON format'
+            return (RedfishClient.ERR_CODE_INVALID_JSON_FORMAT, msg)
+        except Exception as e:
+            msg = 'Error: unexpected response'
+            return (RedfishClient.ERR_CODE_UNEXPECTED_RESPONSE, msg)
+
+        if 'error' in json_response: # Error found
+            err = json_response['error']
+            if 'message' in err:
+                err_msg = err['message']
+                ret = RedfishClient.ERR_CODE_GENERIC_ERROR
+
+                if 'ActionParameterUnknown' in err.get('code', ''):
+                    ret = RedfishClient.ERR_CODE_UNSUPPORTED_PARAMETER
+            else:
+                ret = RedfishClient.ERR_CODE_UNEXPECTED_RESPONSE
+                err_msg = "Missing 'message' field"
+
+        return (ret, err_msg)
+
+    '''
+    Request BMC to reset itself
+
+    Parameters:
+      bmc_reset_type    BMC_RESET_TYPE_GRACEFUL_RESTART or BMC_RESET_TYPE_FORCE_RESTART
+
+    Return value:  (ret, error_msg)
+      ret         return code
+      error_msg   error message string
+    '''
+    def redfish_api_request_bmc_reset(self, bmc_reset_type=None):
+        if bmc_reset_type is None:
+            bmc_reset_type = RedfishClient.BMC_RESET_TYPE_GRACEFUL_RESTART
+
+        cmd = self.__build_request_bmc_reset_cmd(bmc_reset_type)
+        ret, _, response, err_msg = self.exec_curl_cmd(cmd)
+        json_response = None
+
+        if (ret != RedfishClient.ERR_CODE_OK):
+            self.log_notice(f'Reset BMC return not OK, ret {ret}, response {response}, err msg {err_msg}')
+            return (ret, err_msg)
+
+        # When action succeds, doesn't return any response.
+        # If we got a response, probably it is an error.
+        # Try to parse it
+        if response is None or len(response) == 0:
+            self.log_notice(f'Reset BMC return OK, ret {ret}, err msg {err_msg}')
+            return (RedfishClient.ERR_CODE_OK, '')
+
+        reset_type = RedfishClient.BMC_RESET_TYPE_MAP[bmc_reset_type]
+        self.log_notice(f"After requesting BMC {reset_type}, got response {response} and error {err_msg}")
 
         try:
             json_response = json.loads(response)
