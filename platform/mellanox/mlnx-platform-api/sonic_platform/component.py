@@ -932,31 +932,31 @@ class ComponentBMCObj(Component):
 
     def install_firmware(self, image_path):
         if not self._check_file_validity(image_path):
-            return (False, ('Invalid firmware image path', False))
+            print(f"Invalid firmware image path: {image_path}")
+            return False
         print('Starting {} firmware update, path={}'.format(self.get_firmware_id(), image_path))
         ret = 0
         error_msg = ''
-
         try:
             ret, error_msg = self.bmc.update_firmware(image_path)
+            if ret != 0:
+                print(f'Fail to update BMC firmware. Error {ret}: {error_msg}')
+                return False
+            print('Successfully updated BMC firmware, restarting BMC...')
+            ret, error_msg = self.bmc.request_bmc_reset()
+            if ret != 0:
+                print(f'Failed to restart BMC. Error {ret}: {error_msg}')
+                return False
+            return True
         except Exception as e:
             error_trace = traceback.format_exc()
             print(str(e))
             print(error_trace)
             raise
 
-        if ret == 0:
-            print('Successfully upgraded BMC firmware')
-            # TODO(BMC): Check if self.bmc.request_bmc_reset is required for apply the installation
-            return True
-        else:
-            print(f'Fail to upgrade BMC firmware. Error {ret}: {error_msg}')
-            return False
-
     def get_firmware_version(self):
         return self.bmc.get_version()
-    
-    # TODO(BMC): Add get_firmware_update_notification if self.bmc.request_bmc_reset is needed
+
 
 class ComponentBMC(ComponentBMCObj):
     COMPONENT_NAME = 'BMC'
