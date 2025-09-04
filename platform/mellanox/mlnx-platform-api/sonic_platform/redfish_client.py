@@ -131,6 +131,7 @@ class RedfishClient:
     ERR_CODE_SERVER_UNREACHABLE = -10
     ERR_CODE_UNSUPPORTED_PARAMETER = -11
     ERR_CODE_GENERIC_ERROR = -12
+    ERR_CODE_IDENTICAL_VERSION = -13
 
     CURL_ERR_OK = 0
     CURL_ERR_OPERATION_TIMEDOUT = 28
@@ -1033,7 +1034,7 @@ class RedfishClient:
         if lower_version:
            result['ret_code'] = RedfishClient.ERR_CODE_LOWER_VERSION
         elif identical_version and not err_detected:
-           result['ret_code'] = RedfishClient.ERR_CODE_OK
+           result['ret_code'] = RedfishClient.ERR_CODE_IDENTICAL_VERSION
            # identical version comes with an 'aborted' message. Clear it.
            result['ret_msg'] = ''
 

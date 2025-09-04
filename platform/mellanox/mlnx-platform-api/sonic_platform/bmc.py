@@ -244,9 +244,16 @@ class BMC(BMCBase):
             comp_data = utils.load_json_file(platform_components_json_path)
             if not comp_data or len(comp_data.get('chassis', {})) == 0:
                 return None
-            if 'component' not in comp_data['chassis']:
+            
+            chassis_data = comp_data['chassis']
+            components = None
+            for platform_name, platform_data in chassis_data.items():
+                if 'component' in platform_data:
+                    components = platform_data['component']
+                    break
+            if components is None:
                 return None
-            components =  comp_data['chassis']['component']
+                
             attrs = components.get(component_name, {})
             if attrs:
                 return attrs.get(attr_name, None)
@@ -264,12 +271,16 @@ class BMC(BMCBase):
         if not comp_data or len(comp_data.get('chassis', {})) == 0:
             return []
 
-        if 'component' not in comp_data['chassis']:
+        chassis_data = comp_data['chassis']
+        components = None
+        for platform_name, platform_data in chassis_data.items():
+            if 'component' in platform_data:
+                components = platform_data['component']
+                break
+        if components is None:
             return []
 
-        components =  comp_data['chassis']['component']
         comp_list = []
-
         for comp_name, attrs in components.items():
             # Skip if not managed by BMC
             managed_by = attrs.get('managed_by', '')
@@ -428,9 +439,11 @@ class BMC(BMCBase):
                                                             progress_callback)
         logger.log_notice(f'Firmware update result: {ret}')
 
-        # Downgrade detected
         if force_update == False and ret == RedfishClient.ERR_CODE_LOWER_VERSION:
             logger.log_notice(f'Firmware image timestamp is lower than the current timestamp')
+        
+        if force_update == False and ret == RedfishClient.ERR_CODE_IDENTICAL_VERSION:
+            logger.log_notice(f'Firmware image version is identical to the current version')
 
         if msg:
             # Replace BMC internal firmware id with component display name in the message
@@ -441,10 +454,17 @@ class BMC(BMCBase):
         return (ret, msg)
     
     def update_firmware(self, fw_image):
-        ret, msg = self.update_components_firmware(fw_image)
+        fw_id = self.get_id()
+        if not fw_id:
+            logger.log_error('BMC firmware ID is not defined')
+            return (RedfishClient.ERR_CODE_GENERIC_ERROR, 'BMC firmware ID is not defined')
+        ret, msg = self.update_components_firmware(fw_image, fw_ids=[fw_id])
         if ret == RedfishClient.ERR_CODE_LOWER_VERSION:
-            logger.log_notice(f'Try to update BMC firmware with force update for downgrading')
-            ret, msg = self.update_components_firmware(fw_image, force_update=True)
+            logger.log_notice(f'Try to update BMC firmware with force update')
+            ret, msg = self.update_components_firmware(fw_image, fw_ids=[fw_id], force_update=True)
+        elif ret == RedfishClient.ERR_CODE_IDENTICAL_VERSION:
+            # TODO(BMC): Decide if we should execute force_update for identical version case
+            ret = RedfishClient.ERR_CODE_OK
         return (ret, msg)
 
     @with_credential_restore
