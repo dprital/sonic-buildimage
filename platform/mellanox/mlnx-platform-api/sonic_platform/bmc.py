@@ -35,7 +35,6 @@ try:
     from sonic_py_common.logger import Logger
     from .redfish_client import RedfishClient
     from . import utils
-    import time
 except ImportError as e:
     raise ImportError (str(e) + "- required module not found")
 
