@@ -463,7 +463,6 @@ class BMC(BMCBase):
             logger.log_notice(f'Try to update BMC firmware with force update')
             ret, msg = self.update_components_firmware(fw_image, fw_ids=[fw_id], force_update=True)
         elif ret == RedfishClient.ERR_CODE_IDENTICAL_VERSION:
-            # TODO(BMC): Decide if we should execute force_update for identical version case
             ret = RedfishClient.ERR_CODE_OK
         return (ret, msg)
 
