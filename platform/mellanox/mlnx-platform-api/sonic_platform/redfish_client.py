@@ -98,6 +98,7 @@ class RedfishClient:
     REDFISH_URI_UPDATE_SERVICE_UPDATE_MULTIPART = '/redfish/v1/UpdateService/update-multipart'
     REDFISH_URI_UPDATE_SERVICE = '/redfish/v1/UpdateService'
     REDFISH_URI_ACCOUNTS = '/redfish/v1/AccountService/Accounts'
+    REDFISH_DEBUG_TOKEN = '/redfish/v1/Systems/System_0/LogServices/DebugTokenService'
     REDFISH_BMC_LOG_DUMP = '/redfish/v1/Managers/BMC_0/LogServices/Dump/Actions'
     REDFISH_REQUEST_SYSTEM_RESET = '/redfish/v1/Systems/System_0/Actions/ComputerSystem.Reset'
     REDFISH_REQUEST_BMC_RESET = '/redfish/v1/Managers/BMC_0/Actions/Manager.Reset'

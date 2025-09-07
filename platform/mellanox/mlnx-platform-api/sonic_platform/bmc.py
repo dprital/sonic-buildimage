@@ -35,6 +35,7 @@ try:
     from sonic_py_common.logger import Logger
     from .redfish_client import RedfishClient
     from . import utils
+    import time
 except ImportError as e:
     raise ImportError (str(e) + "- required module not found")
 
@@ -176,30 +177,10 @@ class BMC(BMCBase):
             return BMC.BMC_NOS_ACCOUNT_DEFAULT_PASSWORD
 
     def get_login_password(self):
-        return self._get_tmp_password_from_hw_mgmt()
-
-    def _get_tmp_password_from_hw_mgmt(self):
         try:
-            result = subprocess.run([
-                'sudo', sys.executable, '-c', 
-                f'''
-import importlib.util
-spec = importlib.util.spec_from_file_location("{HW_MGMT_REDFISH_CLIENT_NAME}", "{HW_MGMT_REDFISH_CLIENT_PATH}")
-hw_mgmt_redfish_client = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(hw_mgmt_redfish_client)
-print(hw_mgmt_redfish_client.BMCAccessor().get_login_password())
-'''
-            ], capture_output=True, text=True, check=True, timeout=5)
-            
-            password = result.stdout.strip()
-            if not password:
-                raise Exception("Empty TPM password returned from hw_management_redfish_client.py")
-                
-            logger.log_notice("Successfully retrieved TPM password")
-            return password
-            
+            return _get_hw_mgmt_redfish_client().BMCAccessor().get_login_password()
         except Exception as e:
-            logger.log_error(f"Error getting TPM password from hw_management_redfish_client.py: {str(e)}")
+            logger.log_error(f"Error getting login password: {str(e)}")
             raise
 
     @under_lock(lockfile='/var/run/bmc_restore_tpm_credential.lock', timeout=5)
@@ -482,6 +463,7 @@ print(hw_mgmt_redfish_client.BMCAccessor().get_login_password())
             logger.log_notice(f'Try to update BMC firmware with force update')
             ret, msg = self.update_components_firmware(fw_image, fw_ids=[fw_id], force_update=True)
         elif ret == RedfishClient.ERR_CODE_IDENTICAL_VERSION:
+            # TODO(BMC): Decide if we should execute force_update for identical version case
             ret = RedfishClient.ERR_CODE_OK
         return (ret, msg)
 
