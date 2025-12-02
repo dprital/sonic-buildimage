@@ -1,10 +1,11 @@
+{%- set configured_platform = CONFIGURED_PLATFORM | default('') -%}
 {
     "DEVICE_METADATA": {
         "localhost": {
             "buffer_model": {% if default_buffer_model == "dynamic" %}"dynamic"{% else %}"traditional"{% endif %},
             {%- if include_p4rt == "y" %}"synchronous_mode":"enable",{% endif %}
             "default_bgp_status": {% if shutdown_bgp_on_start == "y" %}"down"{% else %}"up"{% endif %},
-            "default_pfcwd_status": {% if enable_pfcwd_on_start == "y" %}"enable"{% else %}"disable"{% endif %},
+            "default_pfcwd_status": {% if configured_platform == "x86_64-nvidia_sn5640-r0" %}"disable"{% elif enable_pfcwd_on_start == "y" %}"enable"{% else %}"disable"{% endif %},
             "timezone": "UTC"
         }
     },
