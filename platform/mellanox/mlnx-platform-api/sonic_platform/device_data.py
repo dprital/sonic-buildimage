@@ -108,6 +108,8 @@ DEVICE_DATA = {
     },
     'x86_64-mlnx_msn4700-r0': {
     },
+    'x86_64-mlnx_sn4700d-r0': {
+    },
     'x86_64-mlnx_msn4410-r0': {
     },
     'x86_64-mlnx_msn3420-r0': {
