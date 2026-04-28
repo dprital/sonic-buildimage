@@ -21,6 +21,11 @@
                 "name": "CPLD3"
             }
         ],
+        "pdbs": [
+            {
+                "name": "PDB 1"
+            }
+        ],
         "fans": [],
         "fan_drawers": [
             {
