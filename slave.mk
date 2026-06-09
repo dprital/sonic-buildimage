@@ -261,6 +261,10 @@ ifeq ($(ENABLE_AUTO_TECH_SUPPORT),y)
 ENABLE_AUTO_TECH_SUPPORT = y
 endif
 
+ifeq ($(ENABLE_REDIS_RECORDER),y)
+ENABLE_REDIS_RECORDER = y
+endif
+
 ifeq ($(SONIC_INCLUDE_MUX),y)
 INCLUDE_MUX = y
 endif
@@ -513,6 +517,7 @@ $(info "ENABLE_TRANSLIB_WRITE"           : "$(ENABLE_TRANSLIB_WRITE)")
 $(info "ENABLE_NATIVE_WRITE"             : "$(ENABLE_NATIVE_WRITE)")
 $(info "ENABLE_DIALOUT"                  : "$(ENABLE_DIALOUT)")
 $(info "ENABLE_AUTO_TECH_SUPPORT"        : "$(ENABLE_AUTO_TECH_SUPPORT)")
+$(info "ENABLE_REDIS_RECORDER"           : "$(ENABLE_REDIS_RECORDER)")
 $(info "PDDF_SUPPORT"                    : "$(PDDF_SUPPORT)")
 $(info "MULTIARCH_QEMU_ENVIRON"          : "$(MULTIARCH_QEMU_ENVIRON)")
 $(info "SONIC_VERSION_CONTROL_COMPONENTS": "$(SONIC_VERSION_CONTROL_COMPONENTS)")
@@ -1659,6 +1664,7 @@ $(addprefix $(TARGET_PATH)/, $(SONIC_INSTALLERS)) : $(TARGET_PATH)/% : \
 	export include_lldp="$(INCLUDE_LLDP)"
 	export include_sflow="$(INCLUDE_SFLOW)"
 	export enable_auto_tech_support="$(ENABLE_AUTO_TECH_SUPPORT)"
+	export enable_redis_recorder="$(ENABLE_REDIS_RECORDER)"
 	export enable_asan="$(ENABLE_ASAN)"
 	export include_macsec="$(INCLUDE_MACSEC)"
 	export include_dhcp_server="$(INCLUDE_DHCP_SERVER)"
