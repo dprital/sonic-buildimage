@@ -1,0 +1,2 @@
+SAI_INIT_CONFIG_FILE=/usr/share/sonic/hwsku/sai_4700d_40x200g_8x400g_4x25g.xml
+SAI_INDEPENDENT_MODULE_MODE=1
